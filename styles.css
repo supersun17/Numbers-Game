@@ -155,17 +155,54 @@ h1 {
 
 .stat-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 10px;
+}
+
+.stat-separator {
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin: 0 10px;
 }
 
 .stat-label {
     font-weight: bold;
-    color: #fff;
+    width: 160px;
+    text-align: left;
+    flex-shrink: 0;
+}
+
+.stat-value {
+    font-weight: bold;
+}
+
+.basic-stat {
+    color: #3E5F44;
+}
+
+.gained-stat {
+    color: #93DA97;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+.stat-label {
+    font-weight: bold;
+}
+
+.basic-stat {
+    color: #3E5F44;
+}
+
+.gained-stat {
+    color: #93DA97;
+    margin-left: 8px;
+    font-size: 0.9em;
 }
 
 .stat-value {

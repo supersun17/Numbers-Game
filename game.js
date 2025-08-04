@@ -24,7 +24,11 @@ class PixelGame {
                 attackSpeed: 0.5,
                 attackRange: 150,
                 criticalHitChance: 15,
-                criticalHitDamage: 200
+                criticalHitDamage: 200,
+                gainedAttackPower: 0,
+                gainedAttackSpeed: 0,
+                gainedAttackRange: 0,
+                gainedCriticalChance: 0
             },
             lastShotTime: 0
         };
@@ -34,6 +38,7 @@ class PixelGame {
         this.experience = 0;
         this.level = 1;
         this.keys = {};
+        this.levelUpPopup = null;
         
         this.init();
     }
@@ -42,6 +47,7 @@ class PixelGame {
         this.setupEventListeners();
         this.spawnEnemies();
         this.gameLoop();
+        this.updateLevelAndExperience();
     }
     
     setupEventListeners() {
@@ -183,9 +189,10 @@ class PixelGame {
                     this.experience += 1;
                     
                     // Level up every 2 experience
-                    if (this.experience >= this.level * 2) {
+                    if (this.experience >= 2) {
                         this.level += 1;
                         this.experience = 0;
+                        this.handleLevelUp();
                     }
                     
                     this.updateLevelAndExperience();
@@ -219,11 +226,79 @@ class PixelGame {
         this.levelElement.textContent = this.level;
         this.experienceElement.textContent = this.experience;
         
-        const totalExpNeeded = this.level * 2;
+        const totalExpNeeded = 2;
         document.getElementById('total-exp').textContent = totalExpNeeded;
         
         const expPercentage = (this.experience / totalExpNeeded) * 100;
         document.getElementById('exp-fill').style.width = `${expPercentage}%`;
+    }
+    
+    handleLevelUp() {
+        const benefits = [
+            { 
+                text: "+5 Attack Power", 
+                apply: () => {
+                    this.player.stats.gainedAttackPower += 5;
+                }
+            },
+            { 
+                text: "+0.1 Attack Speed", 
+                apply: () => {
+                    this.player.stats.gainedAttackSpeed += 0.1;
+                }
+            },
+            { 
+                text: "+5 Attack Range", 
+                apply: () => {
+                    this.player.stats.gainedAttackRange += 5;
+                }
+            },
+            { 
+                text: "+5% Critical Chance", 
+                apply: () => {
+                    this.player.stats.gainedCriticalChance += 5;
+                }
+            }
+        ];
+        
+        const randomBenefit = benefits[Math.floor(Math.random() * benefits.length)];
+        randomBenefit.apply();
+        
+        this.showLevelUpPopup(randomBenefit.text);
+    }
+    
+    showLevelUpPopup(benefitText) {
+        this.levelUpPopup = {
+            text: `Level Up! ${benefitText}`,
+            x: this.player.x + this.player.width / 2,
+            y: this.player.y - 20,
+            opacity: 1,
+            startTime: Date.now()
+        };
+    }
+    
+    updateLevelUpPopup() {
+        if (this.levelUpPopup) {
+            const elapsed = Date.now() - this.levelUpPopup.startTime;
+            if (elapsed >= 2000) {
+                this.levelUpPopup = null;
+            } else {
+                this.levelUpPopup.opacity = 1 - (elapsed / 2000);
+                this.levelUpPopup.y -= 0.5;
+            }
+        }
+    }
+    
+    drawLevelUpPopup() {
+        if (this.levelUpPopup) {
+            this.ctx.save();
+            this.ctx.globalAlpha = this.levelUpPopup.opacity;
+            this.ctx.fillStyle = '#FFFF00';
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.levelUpPopup.text, this.levelUpPopup.x, this.levelUpPopup.y);
+            this.ctx.restore();
+        }
     }
     
     toggleStats() {
@@ -242,6 +317,11 @@ class PixelGame {
         document.getElementById('attackRangeStat').textContent = stats.attackRange;
         document.getElementById('critChanceStat').textContent = `${stats.criticalHitChance}%`;
         document.getElementById('critDamageStat').textContent = `${stats.criticalHitDamage}%`;
+        
+        document.getElementById('attackPowerGained').textContent = `+${stats.gainedAttackPower}`;
+        document.getElementById('attackSpeedGained').textContent = `+${stats.gainedAttackSpeed.toFixed(1)}`;
+        document.getElementById('attackRangeGained').textContent = `+${stats.gainedAttackRange}`;
+        document.getElementById('critChanceGained').textContent = `+${stats.gainedCriticalChance}%`;
         
         this.updateLevelAndExperience();
         this.statsModal.style.display = 'block';
@@ -313,7 +393,9 @@ class PixelGame {
         this.updateBullets();
         this.checkBulletCollisions();
         this.checkCollisions();
+        this.updateLevelUpPopup();
         this.render();
+        this.drawLevelUpPopup();
         
         requestAnimationFrame(() => this.gameLoop());
     }
