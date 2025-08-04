@@ -8,15 +8,22 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>Pixel Adventure</h1>
+        <h1>Numbers Game</h1>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div class="game-info">
-            <div class="score">Score: <span id="score">0</span></div>
+            <div class="level-exp-container">
+                <div class="level">Level: <span id="level">1</span></div>
+                <div class="experience">
+                    <div class="exp-text">Exp: <span id="experience">0</span>/<span id="total-exp">2</span></div>
+                    <div class="exp-bar">
+                        <div class="exp-fill" id="exp-fill"></div>
+                    </div>
+                </div>
+            </div>
             <div class="controls">
-                <p>Use WASD or Arrow Keys to move</p>
-                <p>Auto-shoots at enemies within attack range (150px)</p>
-                <p>Collect the blue squares, avoid the red ones!</p>
-                <p>Press 'C' to view character stats</p>
+                <p>Move: WASD/Arrow Keys | Auto-shoot: 150px range</p>
+                <p>Destroy red boxes: +1 exp | 2 exp = 1 level</p>
+                <p>Press 'C' for stats</p>
             </div>
         </div>
     </div>

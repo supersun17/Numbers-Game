@@ -36,17 +36,62 @@ h1 {
 }
 
 .game-info {
-    margin-top: 20px;
+    margin-top: 10px;
     background-color: #000000;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #ffffff;
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.score {
-    font-size: 1.5rem;
+.level-exp-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.level {
+    font-size: 1rem;
     font-weight: bold;
-    margin-bottom: 10px;
+}
+
+.experience {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #00ff88;
+    text-align: right;
+}
+
+.exp-text {
+    margin-bottom: 2px;
+}
+
+.exp-bar {
+    width: 120px;
+    height: 6px;
+    background-color: #333;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-left: auto;
+}
+
+.exp-fill {
+    height: 100%;
+    background-color: #00ff88;
+    transition: width 0.3s ease;
+}
+
+.controls {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    line-height: 1.2;
+}
+
+.controls p {
+    margin: 2px 0;
 }
 
 .controls {

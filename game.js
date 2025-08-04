@@ -2,7 +2,8 @@ class PixelGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.scoreElement = document.getElementById('score');
+        this.levelElement = document.getElementById('level');
+        this.experienceElement = document.getElementById('experience');
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
@@ -28,10 +29,10 @@ class PixelGame {
             lastShotTime: 0
         };
         
-        this.collectibles = [];
         this.enemies = [];
         this.bullets = [];
-        this.score = 0;
+        this.experience = 0;
+        this.level = 1;
         this.keys = {};
         
         this.init();
@@ -39,7 +40,6 @@ class PixelGame {
     
     init() {
         this.setupEventListeners();
-        this.spawnCollectibles();
         this.spawnEnemies();
         this.gameLoop();
     }
@@ -70,20 +70,9 @@ class PixelGame {
         });
     }
     
-    spawnCollectibles() {
-        for (let i = 0; i < 5; i++) {
-            this.collectibles.push({
-                x: Math.random() * (this.canvas.width - 15),
-                y: Math.random() * (this.canvas.height - 15),
-                width: 15,
-                height: 15,
-                color: '#0080ff'
-            });
-        }
-    }
     
     spawnEnemies() {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 15; i++) {
             this.enemies.push({
                 x: Math.random() * (this.canvas.width - 20),
                 y: Math.random() * (this.canvas.height / 3 - 20),
@@ -191,8 +180,15 @@ class PixelGame {
             this.enemies = this.enemies.filter(enemy => {
                 if (this.isColliding(bullet, enemy)) {
                     bulletHit = true;
-                    this.score += 5;
-                    this.updateScore();
+                    this.experience += 1;
+                    
+                    // Level up every 2 experience
+                    if (this.experience >= this.level * 2) {
+                        this.level += 1;
+                        this.experience = 0;
+                    }
+                    
+                    this.updateLevelAndExperience();
                     return false;
                 }
                 return true;
@@ -203,28 +199,13 @@ class PixelGame {
     }
     
     checkCollisions() {
-        this.collectibles = this.collectibles.filter(collectible => {
-            if (this.isColliding(this.player, collectible)) {
-                this.score += 10;
-                this.updateScore();
-                return false;
-            }
-            return true;
-        });
-        
         this.enemies.forEach(enemy => {
             if (this.isColliding(this.player, enemy)) {
-                this.score = Math.max(0, this.score - 5);
-                this.updateScore();
-                
+                // No penalty for touching enemies, just reposition
                 enemy.x = Math.random() * (this.canvas.width - enemy.width);
                 enemy.y = Math.random() * (this.canvas.height - enemy.height);
             }
         });
-        
-        if (this.collectibles.length === 0) {
-            this.spawnCollectibles();
-        }
     }
     
     isColliding(rect1, rect2) {
@@ -234,8 +215,15 @@ class PixelGame {
                rect1.y + rect1.height > rect2.y;
     }
     
-    updateScore() {
-        this.scoreElement.textContent = this.score;
+    updateLevelAndExperience() {
+        this.levelElement.textContent = this.level;
+        this.experienceElement.textContent = this.experience;
+        
+        const totalExpNeeded = this.level * 2;
+        document.getElementById('total-exp').textContent = totalExpNeeded;
+        
+        const expPercentage = (this.experience / totalExpNeeded) * 100;
+        document.getElementById('exp-fill').style.width = `${expPercentage}%`;
     }
     
     toggleStats() {
@@ -255,6 +243,7 @@ class PixelGame {
         document.getElementById('critChanceStat').textContent = `${stats.criticalHitChance}%`;
         document.getElementById('critDamageStat').textContent = `${stats.criticalHitDamage}%`;
         
+        this.updateLevelAndExperience();
         this.statsModal.style.display = 'block';
     }
     
@@ -294,9 +283,6 @@ class PixelGame {
             this.player.color
         );
         
-        this.collectibles.forEach(collectible => {
-            this.drawPixelRect(collectible.x, collectible.y, collectible.width, collectible.height, collectible.color);
-        });
         
         this.enemies.forEach(enemy => {
             this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
