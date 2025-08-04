@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Pixel Adventure</h1>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="controls">
+                <p>Use WASD or Arrow Keys to move</p>
+                <p>Collect the blue squares, avoid the red ones!</p>
+                <p>Press 'C' to view character stats</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="statsModal" class="stats-modal">
+        <div class="stats-content">
+            <span class="close-stats">&times;</span>
+            <h2>Character Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Health:</span>
+                    <span class="stat-value" id="healthStat">100/100</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Attack Power:</span>
+                    <span class="stat-value" id="attackPowerStat">25</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Attack Speed:</span>
+                    <span class="stat-value" id="attackSpeedStat">1.5</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Attack Range:</span>
+                    <span class="stat-value" id="attackRangeStat">50</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Critical Hit Chance:</span>
+                    <span class="stat-value" id="critChanceStat">15%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Critical Hit Damage:</span>
+                    <span class="stat-value" id="critDamageStat">200%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
