@@ -15,20 +15,22 @@ class PixelGame {
             width: 30,
             height: 30,
             speed: 5,
-            color: '#ffffff',
+            color: '#FEA405',
             stats: {
                 totalHealth: 100,
                 currentHealth: 100,
                 attackPower: 25,
-                attackSpeed: 1.5,
-                attackRange: 50,
+                attackSpeed: 0.5,
+                attackRange: 150,
                 criticalHitChance: 15,
                 criticalHitDamage: 200
-            }
+            },
+            lastShotTime: 0
         };
         
         this.collectibles = [];
         this.enemies = [];
+        this.bullets = [];
         this.score = 0;
         this.keys = {};
         
@@ -81,14 +83,14 @@ class PixelGame {
     }
     
     spawnEnemies() {
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             this.enemies.push({
                 x: Math.random() * (this.canvas.width - 20),
-                y: Math.random() * (this.canvas.height - 20),
+                y: Math.random() * (this.canvas.height / 3 - 20),
                 width: 20,
                 height: 20,
-                speedX: (Math.random() - 0.5) * 4,
-                speedY: (Math.random() - 0.5) * 4,
+                speedX: 0,
+                speedY: 0,
                 color: '#ff0000'
             });
         }
@@ -107,19 +109,96 @@ class PixelGame {
         if (this.keys['s'] || this.keys['ArrowDown']) {
             this.player.y = Math.min(this.canvas.height - this.player.height, this.player.y + this.player.speed);
         }
+        
+        this.handleAutoShooting();
+    }
+    
+    handleAutoShooting() {
+        const currentTime = Date.now();
+        const attackInterval = 1000 / this.player.stats.attackSpeed;
+        
+        if (currentTime - this.player.lastShotTime >= attackInterval) {
+            const target = this.findClosestTarget();
+            if (target) {
+                const dx = target.x + target.width / 2 - (this.player.x + this.player.width / 2);
+                const dy = target.y + target.height / 2 - (this.player.y + this.player.height / 2);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance <= this.player.stats.attackRange) {
+                    const directionX = dx / distance;
+                    const directionY = dy / distance;
+                    
+                    this.bullets.push({
+                        x: this.player.x + this.player.width / 2,
+                        y: this.player.y + this.player.height / 2,
+                        width: 2,
+                        height: 2,
+                        speed: 1,
+                        directionX: directionX,
+                        directionY: directionY,
+                        damage: this.player.stats.attackPower,
+                        color: '#ffffff'
+                    });
+                    this.player.lastShotTime = currentTime;
+                }
+            }
+        }
+    }
+    
+    findClosestTarget() {
+        const allTargets = [...this.enemies];
+        let closestTarget = null;
+        let closestDistance = Infinity;
+        
+        const playerCenterX = this.player.x + this.player.width / 2;
+        const playerCenterY = this.player.y + this.player.height / 2;
+        
+        allTargets.forEach(target => {
+            const targetCenterX = target.x + target.width / 2;
+            const targetCenterY = target.y + target.height / 2;
+            const distance = Math.sqrt(
+                Math.pow(targetCenterX - playerCenterX, 2) + 
+                Math.pow(targetCenterY - playerCenterY, 2)
+            );
+            
+            if (distance < closestDistance && distance <= this.player.stats.attackRange) {
+                closestDistance = distance;
+                closestTarget = target;
+            }
+        });
+        
+        return closestTarget;
     }
     
     updateEnemies() {
-        this.enemies.forEach(enemy => {
-            enemy.x += enemy.speedX;
-            enemy.y += enemy.speedY;
+        // Enemies are now stationary
+    }
+    
+    updateBullets() {
+        this.bullets = this.bullets.filter(bullet => {
+            bullet.x += bullet.directionX * bullet.speed;
+            bullet.y += bullet.directionY * bullet.speed;
             
-            if (enemy.x <= 0 || enemy.x >= this.canvas.width - enemy.width) {
-                enemy.speedX *= -1;
-            }
-            if (enemy.y <= 0 || enemy.y >= this.canvas.height - enemy.height) {
-                enemy.speedY *= -1;
-            }
+            return bullet.x >= 0 && bullet.x <= this.canvas.width &&
+                   bullet.y >= 0 && bullet.y <= this.canvas.height;
+        });
+    }
+    
+    checkBulletCollisions() {
+        this.bullets = this.bullets.filter(bullet => {
+            let bulletHit = false;
+            
+            this.enemies = this.enemies.filter(enemy => {
+                if (this.isColliding(bullet, enemy)) {
+                    bulletHit = true;
+                    this.score += 5;
+                    this.updateScore();
+                    return false;
+                }
+                return true;
+            });
+            
+            return !bulletHit;
         });
     }
     
@@ -188,12 +267,32 @@ class PixelGame {
         this.ctx.fillRect(Math.floor(x), Math.floor(y), width, height);
     }
     
+    drawCircle(x, y, radius, color) {
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        this.ctx.fill();
+    }
+    
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Set background color
+        this.ctx.fillStyle = '#8AA624';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
         this.ctx.imageSmoothingEnabled = false;
         
-        this.drawPixelRect(this.player.x, this.player.y, this.player.width, this.player.height, this.player.color);
+        // Draw attack range circle
+        this.drawAttackRange();
+        
+        // Draw player as filled circle
+        this.drawCircle(
+            this.player.x + this.player.width / 2, 
+            this.player.y + this.player.height / 2, 
+            this.player.width / 2, 
+            this.player.color
+        );
         
         this.collectibles.forEach(collectible => {
             this.drawPixelRect(collectible.x, collectible.y, collectible.width, collectible.height, collectible.color);
@@ -202,11 +301,31 @@ class PixelGame {
         this.enemies.forEach(enemy => {
             this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
         });
+        
+        this.bullets.forEach(bullet => {
+            this.drawPixelRect(bullet.x, bullet.y, bullet.width, bullet.height, bullet.color);
+        });
+    }
+    
+    drawAttackRange() {
+        const centerX = this.player.x + this.player.width / 2;
+        const centerY = this.player.y + this.player.height / 2;
+        const radius = this.player.stats.attackRange;
+        
+        this.ctx.strokeStyle = '#FFFFF0';
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
     }
     
     gameLoop() {
         this.handleInput();
         this.updateEnemies();
+        this.updateBullets();
+        this.checkBulletCollisions();
         this.checkCollisions();
         this.render();
         

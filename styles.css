@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Courier New', monospace;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    background: #000000;
     color: white;
     min-height: 100vh;
     display: flex;
@@ -17,6 +17,7 @@ body {
 .game-container {
     text-align: center;
     padding: 20px;
+    background-color: #000000;
 }
 
 h1 {
@@ -36,6 +37,10 @@ h1 {
 
 .game-info {
     margin-top: 20px;
+    background-color: #000000;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ffffff;
 }
 
 .score {
@@ -65,7 +70,7 @@ h1 {
 }
 
 .stats-content {
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    background: #000000;
     margin: 10% auto;
     padding: 30px;
     border: 2px solid #fff;
