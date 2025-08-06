@@ -40,6 +40,7 @@ class PixelGame {
         this.level = 1;
         this.keys = {};
         this.levelUpPopup = null;
+        this.damagePopups = [];
         
         this.init();
     }
@@ -187,6 +188,11 @@ class PixelGame {
             this.enemies = this.enemies.filter(enemy => {
                 if (this.isColliding(bullet, enemy)) {
                     bulletHit = true;
+                    const damage = this.player.stats.attackPower + this.player.stats.gainedAttackPower;
+                    
+                    // Show damage popup
+                    this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                    
                     this.experience += 1;
                     
                     // Level up every 2 experience
@@ -294,6 +300,17 @@ class PixelGame {
                 this.levelUpPopup.y -= 0.5;
             }
         }
+        
+        // Update damage popups
+        this.damagePopups = this.damagePopups.filter(popup => {
+            const elapsed = Date.now() - popup.startTime;
+            if (elapsed >= 1000) {
+                return false;
+            }
+            popup.opacity = 1 - (elapsed / 1000);
+            popup.y -= 1;
+            return true;
+        });
     }
     
     drawLevelUpPopup() {
@@ -306,6 +323,17 @@ class PixelGame {
             this.ctx.fillText(this.levelUpPopup.text, this.levelUpPopup.x, this.levelUpPopup.y);
             this.ctx.restore();
         }
+        
+        // Draw damage popups
+        this.damagePopups.forEach(popup => {
+            this.ctx.save();
+            this.ctx.globalAlpha = popup.opacity;
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(popup.text, popup.x, popup.y);
+            this.ctx.restore();
+        });
     }
     
     toggleStats() {
@@ -406,6 +434,16 @@ class PixelGame {
         this.drawLevelUpPopup();
         
         requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    showDamagePopup(damage, x, y) {
+        this.damagePopups.push({
+            text: `-${damage}`,
+            x: x,
+            y: y,
+            opacity: 1,
+            startTime: Date.now()
+        });
     }
 }
 
