@@ -16,16 +16,16 @@ class PixelGame {
         this.cameraWidth = 800;
         this.cameraHeight = 600;
         
-        // World size (twice the camera view)
-        this.worldWidth = this.cameraWidth * 2;
-        this.worldHeight = this.cameraHeight * 2;
+        // World size (same width as camera, 3x height)
+        this.worldWidth = this.cameraWidth;
+        this.worldHeight = this.cameraHeight * 3;
         
         this.canvas.width = this.cameraWidth;
         this.canvas.height = this.cameraHeight;
         
         this.player = {
             x: this.worldWidth / 2,
-            y: this.worldHeight / 2,
+            y: this.worldHeight - 100, // Spawn at bottom of map
             width: 45,
             height: 45,
             speed: 2,
