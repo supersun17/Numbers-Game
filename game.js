@@ -2,6 +2,8 @@ class PixelGame {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.minimapCanvas = document.getElementById('minimapCanvas');
+        this.minimapCtx = this.minimapCanvas.getContext('2d');
         this.levelElement = document.getElementById('level');
         this.experienceElement = document.getElementById('experience');
         this.statsModal = document.getElementById('statsModal');
@@ -47,6 +49,12 @@ class PixelGame {
             x: this.player.x - this.cameraWidth / 2,
             y: this.player.y - this.cameraHeight / 2
         };
+        
+        // Minimap dimensions
+        this.minimapWidth = 150;
+        this.minimapHeight = 113;
+        this.minimapScaleX = this.minimapWidth / this.worldWidth;
+        this.minimapScaleY = this.minimapHeight / this.worldHeight;
         
         this.enemies = [];
         this.bullets = [];
@@ -458,6 +466,44 @@ class PixelGame {
         this.ctx.setLineDash([]);
     }
     
+    drawMinimap() {
+        // Clear minimap
+        this.minimapCtx.clearRect(0, 0, this.minimapWidth, this.minimapHeight);
+        
+        // Set background
+        this.minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.minimapCtx.fillRect(0, 0, this.minimapWidth, this.minimapHeight);
+        
+        // Draw world border
+        this.minimapCtx.strokeStyle = '#ffffff';
+        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.strokeRect(0, 0, this.minimapWidth, this.minimapHeight);
+        
+        // Draw camera viewport
+        const cameraX = this.camera.x * this.minimapScaleX;
+        const cameraY = this.camera.y * this.minimapScaleY;
+        const cameraW = this.cameraWidth * this.minimapScaleX;
+        const cameraH = this.cameraHeight * this.minimapScaleY;
+        
+        this.minimapCtx.strokeStyle = '#ffff00';
+        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.strokeRect(cameraX, cameraY, cameraW, cameraH);
+        
+        // Draw enemies (red dots)
+        this.minimapCtx.fillStyle = '#ff0000';
+        this.enemies.forEach(enemy => {
+            const enemyX = enemy.x * this.minimapScaleX;
+            const enemyY = enemy.y * this.minimapScaleY;
+            this.minimapCtx.fillRect(enemyX - 1, enemyY - 1, 2, 2);
+        });
+        
+        // Draw player (yellow dot)
+        const playerX = this.player.x * this.minimapScaleX;
+        const playerY = this.player.y * this.minimapScaleY;
+        this.minimapCtx.fillStyle = '#ffff00';
+        this.minimapCtx.fillRect(playerX - 2, playerY - 2, 4, 4);
+    }
+    
     gameLoop() {
         this.handleInput();
         this.updateEnemies();
@@ -467,6 +513,7 @@ class PixelGame {
         this.updateLevelUpPopup();
         this.render();
         this.drawLevelUpPopup();
+        this.drawMinimap();
         
         requestAnimationFrame(() => this.gameLoop());
     }
