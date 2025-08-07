@@ -745,9 +745,6 @@ class PixelGame {
         // Draw attack range circle
         this.drawAttackRange();
         
-        // Draw enemy counter in top left corner
-        this.drawEnemyCounter();
-        
         // Draw player sprite
         if (this.player.spriteLoaded) {
             const screenPos = this.worldToScreen(this.player.x, this.player.y);
@@ -775,6 +772,9 @@ class PixelGame {
         this.bullets.forEach(bullet => {
             this.drawPixelRect(bullet.x, bullet.y, bullet.width, bullet.height, bullet.color);
         });
+        
+        // Draw enemy counter last to ensure it's on top
+        this.drawEnemyCounter();
     }
     
     drawAttackRange() {
@@ -794,18 +794,21 @@ class PixelGame {
     }
     
     drawEnemyCounter() {
-        // Draw enemy counter in top left corner
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        // Draw enemy counter in top left corner with higher z-index
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'source-over';
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
         this.ctx.fillRect(10, 10, 120, 30);
         
         this.ctx.strokeStyle = '#ffffff';
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = 2;
         this.ctx.strokeRect(10, 10, 120, 30);
         
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = 'bold 14px Arial';
+        this.ctx.font = 'bold 16px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.fillText(`Enemies: ${this.enemies.length}`, 15, 30);
+        this.ctx.restore();
     }
     
     drawMinimap() {
