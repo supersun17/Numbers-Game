@@ -236,6 +236,12 @@ class PixelGame {
                     const directionX = dx / distance;
                     const directionY = dy / distance;
                     
+                    // Calculate critical hit
+                    const isCritical = Math.random() * 100 < (this.player.stats.criticalHitChance + this.player.stats.gainedCriticalChance);
+                    const baseDamage = this.player.stats.attackPower + this.player.stats.gainedAttackPower;
+                    const criticalMultiplier = (this.player.stats.criticalHitDamage + this.player.stats.gainedCriticalHitDamage) / 100;
+                    const finalDamage = isCritical ? Math.floor(baseDamage * criticalMultiplier) : baseDamage;
+                    
                     this.bullets.push({
                         x: this.player.x + this.player.width / 2,
                         y: this.player.y + this.player.height / 2,
@@ -244,8 +250,9 @@ class PixelGame {
                         speed: 4,
                         directionX: directionX,
                         directionY: directionY,
-                        damage: this.player.stats.attackPower,
-                        color: '#ffffff'
+                        damage: finalDamage,
+                        isCritical: isCritical,
+                        color: isCritical ? '#ffff00' : '#ffffff'
                     });
                     this.player.lastShotTime = currentTime;
                 }
@@ -300,13 +307,14 @@ class PixelGame {
             this.enemies = this.enemies.filter(enemy => {
                 if (this.isColliding(bullet, enemy)) {
                     bulletHit = true;
-                    const damage = this.player.stats.attackPower + this.player.stats.gainedAttackPower;
+                    const damage = bullet.damage;
                     
                     // Apply damage to enemy
                     enemy.currentHP -= damage;
                     
-                    // Show damage popup
-                    this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                    // Show damage popup with critical indicator
+                    const isCritical = bullet.isCritical;
+                    this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
                     
                     // Check if enemy is defeated
                     if (enemy.currentHP <= 0) {
@@ -830,9 +838,10 @@ class PixelGame {
         requestAnimationFrame(() => this.gameLoop());
     }
     
-    showDamagePopup(damage, x, y, color = '#FFFFFF') {
+    showDamagePopup(damage, x, y, color = '#FFFFFF', isCritical = false) {
+        const damageText = isCritical ? `CRIT ${damage}!` : `-${damage}`;
         this.damagePopups.push({
-            text: `-${damage}`,
+            text: damageText,
             x: x,
             y: y,
             opacity: 1,
