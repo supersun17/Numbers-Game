@@ -185,7 +185,8 @@ class PixelGame {
         const additionalHP = (this.worldLevel - 1) * (this.worldLevel * 0.5);
         const enemyHP = Math.floor((baseHP * worldLevelMultiplier) + additionalHP);
         
-        for (let i = 0; i < 15; i++) {
+        // Spawn 10 enemy A (regular enemies)
+        for (let i = 0; i < 10; i++) {
             this.enemies.push({
                 x: Math.random() * (this.worldWidth - 20),
                 y: Math.random() * (this.worldHeight - 20),
@@ -193,7 +194,24 @@ class PixelGame {
                 height: 20,
                 speedX: 0,
                 speedY: 0,
-                color: '#ff0000',
+                color: '#B9375D',
+                type: 'A',
+                maxHP: enemyHP,
+                currentHP: enemyHP
+            });
+        }
+        
+        // Spawn 5 enemy B (deflector enemies)
+        for (let i = 0; i < 5; i++) {
+            this.enemies.push({
+                x: Math.random() * (this.worldWidth - 20),
+                y: Math.random() * (this.worldHeight - 20),
+                width: 20,
+                height: 20,
+                speedX: 0,
+                speedY: 0,
+                color: '#D25D5D',
+                type: 'B',
                 maxHP: enemyHP,
                 currentHP: enemyHP
             });
@@ -258,8 +276,8 @@ class PixelGame {
                     this.bullets.push({
                         x: this.player.x + this.player.width / 2,
                         y: this.player.y + this.player.height / 2,
-                        width: 2,
-                        height: 2,
+                        width: 4,
+                        height: 4,
                         speed: 4,
                         directionX: directionX,
                         directionY: directionY,
@@ -320,16 +338,30 @@ class PixelGame {
             const originalEnemyCount = this.enemies.length;
             this.enemies = this.enemies.filter(enemy => {
                 if (this.isColliding(bullet, enemy)) {
-                    bulletHit = true;
                     const damage = bullet.damage;
                     
-                    // Apply damage to enemy
-                    enemy.currentHP -= damage;
-                    
-                    // Show damage popup with critical indicator
-                    const isCritical = bullet.isCritical;
-                    this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
-                    
+                    // Handle enemy B deflection
+                    if (enemy.type === 'B') {
+                        // Deflect bullet to random direction
+                        const randomAngle = Math.random() * Math.PI * 2;
+                        bullet.directionX = Math.cos(randomAngle);
+                        bullet.directionY = Math.sin(randomAngle);
+                        
+                        // Change bullet color to indicate deflection
+                        bullet.color = '#D25D5D';
+
+                        // Still apply damage
+                        enemy.currentHP -= damage;
+                        const isCritical = bullet.isCritical;
+                        this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
+                    } else {
+                        bulletHit = true;
+                        // Regular enemy A behavior
+                        enemy.currentHP -= damage;
+                        const isCritical = bullet.isCritical;
+                        this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
+                    }
+
                     // Check if enemy is defeated
                     if (enemy.currentHP <= 0) {
                         this.experience += 1;
@@ -344,7 +376,6 @@ class PixelGame {
                         this.updateLevelAndExperience();
                         return false;
                     }
-                    return true;
                 }
                 return true;
             });
