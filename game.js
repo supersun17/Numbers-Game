@@ -234,7 +234,8 @@ class PixelGame {
     
     handleAutoShooting() {
         const currentTime = Date.now();
-        const attackInterval = 1000 / this.player.stats.attackSpeed;
+        const totalAttackSpeed = this.player.stats.attackSpeed + this.player.stats.gainedAttackSpeed;
+        const attackInterval = 1000 / totalAttackSpeed;
         
         if (currentTime - this.player.lastShotTime >= attackInterval) {
             const target = this.findClosestTarget();
