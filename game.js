@@ -7,6 +7,7 @@ class PixelGame {
         this.levelElement = document.getElementById('level');
         this.experienceElement = document.getElementById('experience');
         this.worldLevelElement = document.getElementById('world-level');
+        this.skillPointsElement = document.getElementById('skill-points');
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
@@ -70,6 +71,7 @@ class PixelGame {
         this.experience = 0;
         this.level = 1;
         this.worldLevel = 1;
+        this.skillPoints = 0;
         this.keys = {};
         this.levelUpPopup = null;
         this.damagePopups = [];
@@ -119,6 +121,13 @@ class PixelGame {
                 this.hideStats();
             }
         });
+        
+        // Skill point buttons
+        document.getElementById('skill-attack').addEventListener('click', () => this.useSkillPoint('attackPower'));
+        document.getElementById('skill-speed').addEventListener('click', () => this.useSkillPoint('attackSpeed'));
+        document.getElementById('skill-range').addEventListener('click', () => this.useSkillPoint('attackRange'));
+        document.getElementById('skill-crit-chance').addEventListener('click', () => this.useSkillPoint('criticalHitChance'));
+        document.getElementById('skill-crit-damage').addEventListener('click', () => this.useSkillPoint('criticalHitDamage'));
     }
     
     loadPlayerSprite() {
@@ -192,6 +201,7 @@ class PixelGame {
     
     advanceWorldLevel() {
         this.worldLevel += 1;
+        this.skillPoints += 1;
         this.updateLevelAndExperience();
         this.spawnEnemies();
     }
@@ -492,6 +502,7 @@ class PixelGame {
         this.levelElement.textContent = this.level;
         this.experienceElement.textContent = this.experience;
         this.worldLevelElement.textContent = this.worldLevel;
+        this.skillPointsElement.textContent = this.skillPoints;
         
         const totalExpNeeded = 2;
         document.getElementById('total-exp').textContent = totalExpNeeded;
@@ -621,12 +632,39 @@ class PixelGame {
         document.getElementById('critChanceGained').textContent = `+${stats.gainedCriticalChance}%`;
         document.getElementById('critDamageGained').textContent = `+${stats.gainedCriticalHitDamage}`;
         
+        // Show/hide skill buttons based on available skill points
+        const skillButtons = document.querySelectorAll('.skill-button');
+        skillButtons.forEach(button => {
+            button.style.display = this.skillPoints > 0 ? 'inline-block' : 'none';
+        });
+        
         this.updateLevelAndExperience();
         this.statsModal.style.display = 'block';
     }
     
     hideStats() {
         this.statsModal.style.display = 'none';
+    }
+    
+    useSkillPoint(statType) {
+        if (this.skillPoints <= 0) return;
+        
+        const statMap = {
+            'attackPower': 'gainedAttackPower',
+            'attackSpeed': 'gainedAttackSpeed',
+            'attackRange': 'gainedAttackRange',
+            'criticalHitChance': 'gainedCriticalChance',
+            'criticalHitDamage': 'gainedCriticalHitDamage'
+        };
+        
+        const statKey = statMap[statType];
+        if (statKey) {
+            // Double the current gained value
+            this.player.stats[statKey] *= 2;
+            this.skillPoints -= 1;
+            this.updateLevelAndExperience();
+            this.showStats(); // Refresh the stats display
+        }
     }
     
     worldToScreen(x, y) {
