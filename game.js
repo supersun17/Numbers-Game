@@ -631,7 +631,7 @@ class PixelGame {
         document.getElementById('attackSpeedStat').textContent = stats.attackSpeed;
         document.getElementById('attackRangeStat').textContent = stats.attackRange;
         document.getElementById('critChanceStat').textContent = `${stats.criticalHitChance}%`;
-        document.getElementById('critDamageStat').textContent = `${stats.criticalHitDamage + stats.gainedCriticalHitDamage}%`;
+        document.getElementById('critDamageStat').textContent = `${stats.criticalHitDamage}%`;
         
         document.getElementById('attackPowerGained').textContent = `+${stats.gainedAttackPower}`;
         document.getElementById('attackSpeedGained').textContent = `+${stats.gainedAttackSpeed.toFixed(1)}`;
