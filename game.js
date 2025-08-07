@@ -8,6 +8,7 @@ class PixelGame {
         this.experienceElement = document.getElementById('experience');
         this.worldLevelElement = document.getElementById('world-level');
         this.skillPointsElement = document.getElementById('skill-points');
+        this.skillInstructionElement = document.getElementById('skill-instruction');
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
@@ -505,6 +506,9 @@ class PixelGame {
         this.experienceElement.textContent = this.experience;
         this.worldLevelElement.textContent = this.worldLevel;
         this.skillPointsElement.textContent = this.skillPoints;
+        
+        // Show/hide skill instruction
+        this.skillInstructionElement.style.display = this.skillPoints >= 1 ? 'inline' : 'none';
         
         const totalExpNeeded = 2;
         document.getElementById('total-exp').textContent = totalExpNeeded;

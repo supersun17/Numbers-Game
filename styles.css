@@ -139,8 +139,8 @@ h1 {
     padding: 30px;
     border: 2px solid #fff;
     border-radius: 15px;
-    width: 400px;
-    max-width: 90%;
+    width: 500px;
+    max-width: 95%;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     position: relative;
 }
@@ -211,7 +211,7 @@ h1 {
 
 .stat-label {
     font-weight: bold;
-    width: 160px;
+    width: 180px;
     text-align: left;
     flex-shrink: 0;
 }
