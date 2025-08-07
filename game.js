@@ -56,6 +56,9 @@ class PixelGame {
         this.minimapScaleX = this.minimapWidth / this.worldWidth;
         this.minimapScaleY = this.minimapHeight / this.worldHeight;
         
+        // Generate mud roads
+        this.roads = this.generateRoads();
+        
         this.enemies = [];
         this.bullets = [];
         this.experience = 0;
@@ -100,6 +103,45 @@ class PixelGame {
         });
     }
     
+    
+    generateRoads() {
+        const roads = [];
+        const numRoads = 5;
+        
+        for (let i = 0; i < numRoads; i++) {
+            const road = {
+                points: [],
+                width: 40 + Math.random() * 20 // 40-60 pixels wide
+            };
+            
+            // Generate curved road path
+            const startX = Math.random() * this.worldWidth;
+            const startY = Math.random() * this.worldHeight;
+            
+            let currentX = startX;
+            let currentY = startY;
+            const segments = 8 + Math.floor(Math.random() * 5); // 8-12 segments
+            
+            for (let j = 0; j < segments; j++) {
+                road.points.push({ x: currentX, y: currentY });
+                
+                // Random direction change
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 200;
+                
+                currentX += Math.cos(angle) * distance;
+                currentY += Math.sin(angle) * distance;
+                
+                // Clamp to world boundaries
+                currentX = Math.max(0, Math.min(this.worldWidth, currentX));
+                currentY = Math.max(0, Math.min(this.worldHeight, currentY));
+            }
+            
+            roads.push(road);
+        }
+        
+        return roads;
+    }
     
     spawnEnemies() {
         for (let i = 0; i < 15; i++) {
@@ -420,14 +462,52 @@ class PixelGame {
         this.ctx.fill();
     }
     
+    drawRoads() {
+        this.ctx.strokeStyle = '#F4A460'; // Sandy brown color
+        this.ctx.lineWidth = 2;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        this.roads.forEach(road => {
+            if (road.points.length < 2) return;
+            
+            this.ctx.beginPath();
+            
+            for (let i = 0; i < road.points.length - 1; i++) {
+                const start = this.worldToScreen(road.points[i].x, road.points[i].y);
+                const end = this.worldToScreen(road.points[i + 1].x, road.points[i + 1].y);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(start.x, start.y);
+                this.ctx.lineTo(end.x, end.y);
+                this.ctx.lineWidth = road.width;
+                this.ctx.strokeStyle = '#F4A460'; // Sandy brown
+                this.ctx.stroke();
+                
+                // Add texture with slightly darker sand lines
+                this.ctx.beginPath();
+                this.ctx.moveTo(start.x, start.y);
+                this.ctx.lineTo(end.x, end.y);
+                this.ctx.lineWidth = road.width - 5;
+                this.ctx.strokeStyle = '#D2B48C'; // Tan color for texture
+                this.ctx.globalAlpha = 0.5;
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
+            }
+        });
+    }
+    
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Set background color
+        // Set background color (grass green)
         this.ctx.fillStyle = '#8AA624';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         this.ctx.imageSmoothingEnabled = false;
+        
+        // Draw roads first (under everything)
+        this.drawRoads();
         
         // Draw attack range circle
         this.drawAttackRange();
@@ -439,7 +519,6 @@ class PixelGame {
             this.player.width / 2, 
             this.player.color
         );
-        
         
         this.enemies.forEach(enemy => {
             this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
@@ -478,6 +557,25 @@ class PixelGame {
         this.minimapCtx.strokeStyle = '#ffffff';
         this.minimapCtx.lineWidth = 1;
         this.minimapCtx.strokeRect(0, 0, this.minimapWidth, this.minimapHeight);
+        
+        // Draw roads on minimap (thin sandy lines)
+        this.minimapCtx.strokeStyle = '#F4A460';
+        this.minimapCtx.lineWidth = 1;
+        this.roads.forEach(road => {
+            if (road.points.length < 2) return;
+            
+            this.minimapCtx.beginPath();
+            const startX = road.points[0].x * this.minimapScaleX;
+            const startY = road.points[0].y * this.minimapScaleY;
+            this.minimapCtx.moveTo(startX, startY);
+            
+            for (let i = 1; i < road.points.length; i++) {
+                const x = road.points[i].x * this.minimapScaleX;
+                const y = road.points[i].y * this.minimapScaleY;
+                this.minimapCtx.lineTo(x, y);
+            }
+            this.minimapCtx.stroke();
+        });
         
         // Draw camera viewport
         const cameraX = this.camera.x * this.minimapScaleX;
