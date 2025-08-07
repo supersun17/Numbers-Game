@@ -171,6 +171,10 @@ class PixelGame {
     
     spawnEnemies() {
         const baseHP = 25; // Base HP for World Level 1
+        const worldLevelMultiplier = this.worldLevel;
+        const additionalHP = (this.worldLevel - 1) * (this.worldLevel * 0.5);
+        const enemyHP = Math.floor((baseHP * worldLevelMultiplier) + additionalHP);
+        
         for (let i = 0; i < 15; i++) {
             this.enemies.push({
                 x: Math.random() * (this.worldWidth - 20),
@@ -180,10 +184,16 @@ class PixelGame {
                 speedX: 0,
                 speedY: 0,
                 color: '#ff0000',
-                maxHP: baseHP,
-                currentHP: baseHP
+                maxHP: enemyHP,
+                currentHP: enemyHP
             });
         }
+    }
+    
+    advanceWorldLevel() {
+        this.worldLevel += 1;
+        this.updateLevelAndExperience();
+        this.spawnEnemies();
     }
     
     handleInput() {
@@ -286,6 +296,7 @@ class PixelGame {
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
             
+            const originalEnemyCount = this.enemies.length;
             this.enemies = this.enemies.filter(enemy => {
                 if (this.isColliding(bullet, enemy)) {
                     bulletHit = true;
@@ -315,6 +326,11 @@ class PixelGame {
                 }
                 return true;
             });
+            
+            // Check if all enemies are defeated after filtering
+            if (this.enemies.length === 0 && originalEnemyCount > 0) {
+                this.advanceWorldLevel();
+            }
             
             return !bulletHit;
         });
@@ -429,6 +445,7 @@ class PixelGame {
     }
     
     checkCollisions() {
+        const originalEnemyCount = this.enemies.length;
         this.enemies = this.enemies.filter(enemy => {
             if (this.isColliding(this.player, enemy)) {
                 // Enemy explodes dealing damage equal to their max HP
@@ -446,6 +463,11 @@ class PixelGame {
             }
             return true;
         });
+        
+        // Check if all enemies are defeated via collision
+        if (this.enemies.length === 0 && originalEnemyCount > 0) {
+            this.advanceWorldLevel();
+        }
         
         // Check for game over
         this.checkGameOver();
@@ -670,6 +692,9 @@ class PixelGame {
         // Draw attack range circle
         this.drawAttackRange();
         
+        // Draw enemy counter in top left corner
+        this.drawEnemyCounter();
+        
         // Draw player sprite
         if (this.player.spriteLoaded) {
             const screenPos = this.worldToScreen(this.player.x, this.player.y);
@@ -713,6 +738,21 @@ class PixelGame {
         this.ctx.arc(screenPos.x, screenPos.y, radius, 0, 2 * Math.PI);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
+    }
+    
+    drawEnemyCounter() {
+        // Draw enemy counter in top left corner
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(10, 10, 120, 30);
+        
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeRect(10, 10, 120, 30);
+        
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`Enemies: ${this.enemies.length}`, 15, 30);
     }
     
     drawMinimap() {
