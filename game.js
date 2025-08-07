@@ -7,12 +7,20 @@ class PixelGame {
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
-        this.canvas.width = 800;
-        this.canvas.height = 600;
+        // Camera view size (what's visible on screen)
+        this.cameraWidth = 800;
+        this.cameraHeight = 600;
+        
+        // World size (twice the camera view)
+        this.worldWidth = this.cameraWidth * 2;
+        this.worldHeight = this.cameraHeight * 2;
+        
+        this.canvas.width = this.cameraWidth;
+        this.canvas.height = this.cameraHeight;
         
         this.player = {
-            x: 400,
-            y: 300,
+            x: this.worldWidth / 2,
+            y: this.worldHeight / 2,
             width: 30,
             height: 30,
             speed: 5,
@@ -32,6 +40,12 @@ class PixelGame {
                 gainedCriticalHitDamage: 0
             },
             lastShotTime: 0
+        };
+        
+        // Camera position (follows the player)
+        this.camera = {
+            x: this.player.x - this.cameraWidth / 2,
+            y: this.player.y - this.cameraHeight / 2
         };
         
         this.enemies = [];
@@ -82,8 +96,8 @@ class PixelGame {
     spawnEnemies() {
         for (let i = 0; i < 15; i++) {
             this.enemies.push({
-                x: Math.random() * (this.canvas.width - 20),
-                y: Math.random() * (this.canvas.height / 3 - 20),
+                x: Math.random() * (this.worldWidth - 20),
+                y: Math.random() * (this.worldHeight - 20),
                 width: 20,
                 height: 20,
                 speedX: 0,
@@ -98,14 +112,22 @@ class PixelGame {
             this.player.x = Math.max(0, this.player.x - this.player.speed);
         }
         if (this.keys['d'] || this.keys['ArrowRight']) {
-            this.player.x = Math.min(this.canvas.width - this.player.width, this.player.x + this.player.speed);
+            this.player.x = Math.min(this.worldWidth - this.player.width, this.player.x + this.player.speed);
         }
         if (this.keys['w'] || this.keys['ArrowUp']) {
             this.player.y = Math.max(0, this.player.y - this.player.speed);
         }
         if (this.keys['s'] || this.keys['ArrowDown']) {
-            this.player.y = Math.min(this.canvas.height - this.player.height, this.player.y + this.player.speed);
+            this.player.y = Math.min(this.worldHeight - this.player.height, this.player.y + this.player.speed);
         }
+        
+        // Update camera to follow player
+        this.camera.x = this.player.x - this.cameraWidth / 2;
+        this.camera.y = this.player.y - this.cameraHeight / 2;
+        
+        // Clamp camera to world boundaries
+        this.camera.x = Math.max(0, Math.min(this.camera.x, this.worldWidth - this.cameraWidth));
+        this.camera.y = Math.max(0, Math.min(this.camera.y, this.worldHeight - this.cameraHeight));
         
         this.handleAutoShooting();
     }
@@ -176,8 +198,8 @@ class PixelGame {
             bullet.x += bullet.directionX * bullet.speed;
             bullet.y += bullet.directionY * bullet.speed;
             
-            return bullet.x >= 0 && bullet.x <= this.canvas.width &&
-                   bullet.y >= 0 && bullet.y <= this.canvas.height;
+            return bullet.x >= 0 && bullet.x <= this.worldWidth &&
+                   bullet.y >= 0 && bullet.y <= this.worldHeight;
         });
     }
     
@@ -216,8 +238,8 @@ class PixelGame {
         this.enemies.forEach(enemy => {
             if (this.isColliding(this.player, enemy)) {
                 // No penalty for touching enemies, just reposition
-                enemy.x = Math.random() * (this.canvas.width - enemy.width);
-                enemy.y = Math.random() * (this.canvas.height - enemy.height);
+                enemy.x = Math.random() * (this.worldWidth - enemy.width);
+                enemy.y = Math.random() * (this.worldHeight - enemy.height);
             }
         });
     }
@@ -315,23 +337,25 @@ class PixelGame {
     
     drawLevelUpPopup() {
         if (this.levelUpPopup) {
+            const screenPos = this.worldToScreen(this.levelUpPopup.x, this.levelUpPopup.y);
             this.ctx.save();
             this.ctx.globalAlpha = this.levelUpPopup.opacity;
             this.ctx.fillStyle = '#FFFF00';
             this.ctx.font = 'bold 14px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.levelUpPopup.text, this.levelUpPopup.x, this.levelUpPopup.y);
+            this.ctx.fillText(this.levelUpPopup.text, screenPos.x, screenPos.y);
             this.ctx.restore();
         }
         
         // Draw damage popups
         this.damagePopups.forEach(popup => {
+            const screenPos = this.worldToScreen(popup.x, popup.y);
             this.ctx.save();
             this.ctx.globalAlpha = popup.opacity;
             this.ctx.fillStyle = '#FFFFFF';
             this.ctx.font = 'bold 12px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(popup.text, popup.x, popup.y);
+            this.ctx.fillText(popup.text, screenPos.x, screenPos.y);
             this.ctx.restore();
         });
     }
@@ -367,15 +391,24 @@ class PixelGame {
         this.statsModal.style.display = 'none';
     }
     
+    worldToScreen(x, y) {
+        return {
+            x: x - this.camera.x,
+            y: y - this.camera.y
+        };
+    }
+    
     drawPixelRect(x, y, width, height, color) {
+        const screenPos = this.worldToScreen(x, y);
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(Math.floor(x), Math.floor(y), width, height);
+        this.ctx.fillRect(Math.floor(screenPos.x), Math.floor(screenPos.y), width, height);
     }
     
     drawCircle(x, y, radius, color) {
+        const screenPos = this.worldToScreen(x, y);
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        this.ctx.arc(screenPos.x, screenPos.y, radius, 0, 2 * Math.PI);
         this.ctx.fill();
     }
     
@@ -414,11 +447,13 @@ class PixelGame {
         const centerY = this.player.y + this.player.height / 2;
         const radius = this.player.stats.attackRange;
         
+        const screenPos = this.worldToScreen(centerX, centerY);
+        
         this.ctx.strokeStyle = '#FFFFF0';
         this.ctx.lineWidth = 1;
         this.ctx.setLineDash([5, 5]);
         this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        this.ctx.arc(screenPos.x, screenPos.y, radius, 0, 2 * Math.PI);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
     }
