@@ -6,6 +6,7 @@ class PixelGame {
         this.minimapCtx = this.minimapCanvas.getContext('2d');
         this.levelElement = document.getElementById('level');
         this.experienceElement = document.getElementById('experience');
+        this.worldLevelElement = document.getElementById('world-level');
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
@@ -68,6 +69,7 @@ class PixelGame {
         this.bullets = [];
         this.experience = 0;
         this.level = 1;
+        this.worldLevel = 1;
         this.keys = {};
         this.levelUpPopup = null;
         this.damagePopups = [];
@@ -168,6 +170,7 @@ class PixelGame {
     }
     
     spawnEnemies() {
+        const baseHP = 25; // Base HP for World Level 1
         for (let i = 0; i < 15; i++) {
             this.enemies.push({
                 x: Math.random() * (this.worldWidth - 20),
@@ -176,7 +179,9 @@ class PixelGame {
                 height: 20,
                 speedX: 0,
                 speedY: 0,
-                color: '#ff0000'
+                color: '#ff0000',
+                maxHP: baseHP,
+                currentHP: baseHP
             });
         }
     }
@@ -286,20 +291,27 @@ class PixelGame {
                     bulletHit = true;
                     const damage = this.player.stats.attackPower + this.player.stats.gainedAttackPower;
                     
+                    // Apply damage to enemy
+                    enemy.currentHP -= damage;
+                    
                     // Show damage popup
                     this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2);
                     
-                    this.experience += 1;
-                    
-                    // Level up every 2 experience
-                    if (this.experience >= 2) {
-                        this.level += 1;
-                        this.experience = 0;
-                        this.handleLevelUp();
+                    // Check if enemy is defeated
+                    if (enemy.currentHP <= 0) {
+                        this.experience += 1;
+                        
+                        // Level up every 2 experience
+                        if (this.experience >= 2) {
+                            this.level += 1;
+                            this.experience = 0;
+                            this.handleLevelUp();
+                        }
+                        
+                        this.updateLevelAndExperience();
+                        return false;
                     }
-                    
-                    this.updateLevelAndExperience();
-                    return false;
+                    return true;
                 }
                 return true;
             });
@@ -419,11 +431,12 @@ class PixelGame {
     checkCollisions() {
         this.enemies = this.enemies.filter(enemy => {
             if (this.isColliding(this.player, enemy)) {
-                // Player loses 10 HP on collision
-                this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - 10);
+                // Enemy explodes dealing damage equal to their max HP
+                const explosionDamage = enemy.maxHP;
+                this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - explosionDamage);
                 
                 // Show damage popup for player (red color)
-                this.showDamagePopup(10, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
+                this.showDamagePopup(explosionDamage, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
                 
                 // Create explosion at enemy position
                 this.createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
@@ -448,6 +461,7 @@ class PixelGame {
     updateLevelAndExperience() {
         this.levelElement.textContent = this.level;
         this.experienceElement.textContent = this.experience;
+        this.worldLevelElement.textContent = this.worldLevel;
         
         const totalExpNeeded = 2;
         document.getElementById('total-exp').textContent = totalExpNeeded;

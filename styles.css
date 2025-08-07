@@ -58,6 +58,13 @@ h1 {
     margin-bottom: 5px;
 }
 
+.world-level {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffaa00;
+    margin-bottom: 5px;
+}
+
 .level {
     font-size: 1rem;
     font-weight: bold;
