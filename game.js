@@ -66,6 +66,7 @@ class PixelGame {
         this.keys = {};
         this.levelUpPopup = null;
         this.damagePopups = [];
+        this.explosions = [];
         
         this.init();
     }
@@ -284,13 +285,77 @@ class PixelGame {
         });
     }
     
+    createExplosion(x, y) {
+        const particles = [];
+        const numParticles = 12;
+        
+        for (let i = 0; i < numParticles; i++) {
+            const angle = (Math.PI * 2 * i) / numParticles;
+            const speed = 2 + Math.random() * 3;
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: 3 + Math.random() * 3,
+                life: 30,
+                maxLife: 30,
+                color: `hsl(${15 + Math.random() * 30}, 100%, 50%)` // Orange-red explosion colors
+            });
+        }
+        
+        this.explosions.push({
+            particles: particles,
+            x: x,
+            y: y
+        });
+    }
+    
+    updateExplosions() {
+        this.explosions = this.explosions.filter(explosion => {
+            explosion.particles = explosion.particles.filter(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life--;
+                particle.size *= 0.95; // Shrink over time
+                return particle.life > 0;
+            });
+            
+            return explosion.particles.length > 0;
+        });
+    }
+    
+    drawExplosions() {
+        this.explosions.forEach(explosion => {
+            explosion.particles.forEach(particle => {
+                const screenPos = this.worldToScreen(particle.x, particle.y);
+                this.ctx.save();
+                this.ctx.globalAlpha = particle.life / particle.maxLife;
+                this.ctx.fillStyle = particle.color;
+                this.ctx.beginPath();
+                this.ctx.arc(screenPos.x, screenPos.y, particle.size, 0, 2 * Math.PI);
+                this.ctx.fill();
+                this.ctx.restore();
+            });
+        });
+    }
+    
     checkCollisions() {
-        this.enemies.forEach(enemy => {
+        this.enemies = this.enemies.filter(enemy => {
             if (this.isColliding(this.player, enemy)) {
-                // No penalty for touching enemies, just reposition
-                enemy.x = Math.random() * (this.worldWidth - enemy.width);
-                enemy.y = Math.random() * (this.worldHeight - enemy.height);
+                // Player loses 10 HP on collision
+                this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - 10);
+                
+                // Show damage popup for player (red color)
+                this.showDamagePopup(10, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
+                
+                // Create explosion at enemy position
+                this.createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                
+                // Remove enemy (they explode)
+                return false;
             }
+            return true;
         });
     }
     
@@ -402,7 +467,7 @@ class PixelGame {
             const screenPos = this.worldToScreen(popup.x, popup.y);
             this.ctx.save();
             this.ctx.globalAlpha = popup.opacity;
-            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillStyle = popup.color || '#FFFFFF';
             this.ctx.font = 'bold 12px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.fillText(popup.text, screenPos.x, screenPos.y);
@@ -609,20 +674,23 @@ class PixelGame {
         this.checkBulletCollisions();
         this.checkCollisions();
         this.updateLevelUpPopup();
+        this.updateExplosions();
         this.render();
         this.drawLevelUpPopup();
+        this.drawExplosions();
         this.drawMinimap();
         
         requestAnimationFrame(() => this.gameLoop());
     }
     
-    showDamagePopup(damage, x, y) {
+    showDamagePopup(damage, x, y, color = '#FFFFFF') {
         this.damagePopups.push({
             text: `-${damage}`,
             x: x,
             y: y,
             opacity: 1,
-            startTime: Date.now()
+            startTime: Date.now(),
+            color: color
         });
     }
 }
