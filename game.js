@@ -23,9 +23,9 @@ class PixelGame {
         this.player = {
             x: this.worldWidth / 2,
             y: this.worldHeight / 2,
-            width: 30,
-            height: 30,
-            speed: 5,
+            width: 45,
+            height: 45,
+            speed: 2,
             color: '#FEA405',
             stats: {
                 totalHealth: 100,
@@ -41,8 +41,13 @@ class PixelGame {
                 gainedCriticalChance: 0,
                 gainedCriticalHitDamage: 0
             },
-            lastShotTime: 0
+            lastShotTime: 0,
+            sprite: null,
+            spriteLoaded: false
         };
+        
+        // Load player sprite
+        this.loadPlayerSprite();
         
         // Camera position (follows the player)
         this.camera = {
@@ -75,8 +80,17 @@ class PixelGame {
     init() {
         this.setupEventListeners();
         this.spawnEnemies();
-        this.gameLoop();
-        this.updateLevelAndExperience();
+        // Wait for sprite to load before starting game loop
+        this.checkSpriteLoaded();
+    }
+    
+    checkSpriteLoaded() {
+        if (this.player.spriteLoaded) {
+            this.gameLoop();
+            this.updateLevelAndExperience();
+        } else {
+            setTimeout(() => this.checkSpriteLoaded(), 100);
+        }
     }
     
     setupEventListeners() {
@@ -103,6 +117,14 @@ class PixelGame {
                 this.hideStats();
             }
         });
+    }
+    
+    loadPlayerSprite() {
+        this.player.sprite = new Image();
+        this.player.sprite.src = 'cowboy-avatar.png';
+        this.player.sprite.onload = () => {
+            this.player.spriteLoaded = true;
+        };
     }
     
     
@@ -204,7 +226,7 @@ class PixelGame {
                         y: this.player.y + this.player.height / 2,
                         width: 2,
                         height: 2,
-                        speed: 1,
+                        speed: 4,
                         directionX: directionX,
                         directionY: directionY,
                         damage: this.player.stats.attackPower,
@@ -634,13 +656,25 @@ class PixelGame {
         // Draw attack range circle
         this.drawAttackRange();
         
-        // Draw player as filled circle
-        this.drawCircle(
-            this.player.x + this.player.width / 2, 
-            this.player.y + this.player.height / 2, 
-            this.player.width / 2, 
-            this.player.color
-        );
+        // Draw player sprite
+        if (this.player.spriteLoaded) {
+            const screenPos = this.worldToScreen(this.player.x, this.player.y);
+            this.ctx.drawImage(
+                this.player.sprite, 
+                screenPos.x, 
+                screenPos.y, 
+                this.player.width, 
+                this.player.height
+            );
+        } else {
+            // Fallback to circle if sprite not loaded
+            this.drawCircle(
+                this.player.x + this.player.width / 2, 
+                this.player.y + this.player.height / 2, 
+                this.player.width / 2, 
+                this.player.color
+            );
+        }
         
         this.enemies.forEach(enemy => {
             this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
