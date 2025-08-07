@@ -242,7 +242,8 @@ class PixelGame {
                 const dy = target.y + target.height / 2 - (this.player.y + this.player.height / 2);
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance <= this.player.stats.attackRange) {
+                const totalAttackRange = this.player.stats.attackRange + this.player.stats.gainedAttackRange;
+                if (distance <= totalAttackRange) {
                     const directionX = dx / distance;
                     const directionY = dy / distance;
                     
@@ -277,6 +278,7 @@ class PixelGame {
         
         const playerCenterX = this.player.x + this.player.width / 2;
         const playerCenterY = this.player.y + this.player.height / 2;
+        const totalAttackRange = this.player.stats.attackRange + this.player.stats.gainedAttackRange;
         
         allTargets.forEach(target => {
             const targetCenterX = target.x + target.width / 2;
@@ -286,7 +288,7 @@ class PixelGame {
                 Math.pow(targetCenterY - playerCenterY, 2)
             );
             
-            if (distance < closestDistance && distance <= this.player.stats.attackRange) {
+            if (distance < closestDistance && distance <= totalAttackRange) {
                 closestDistance = distance;
                 closestTarget = target;
             }
@@ -773,7 +775,7 @@ class PixelGame {
     drawAttackRange() {
         const centerX = this.player.x + this.player.width / 2;
         const centerY = this.player.y + this.player.height / 2;
-        const radius = this.player.stats.attackRange;
+        const radius = this.player.stats.attackRange + this.player.stats.gainedAttackRange;
         
         const screenPos = this.worldToScreen(centerX, centerY);
         
