@@ -67,6 +67,7 @@ class PixelGame {
         this.levelUpPopup = null;
         this.damagePopups = [];
         this.explosions = [];
+        this.gameOver = false;
         
         this.init();
     }
@@ -340,6 +341,59 @@ class PixelGame {
         });
     }
     
+    checkGameOver() {
+        if (this.player.stats.currentHealth <= 0 && !this.gameOver) {
+            this.gameOver = true;
+            this.showGameOver();
+        }
+    }
+    
+    showGameOver() {
+        // Create overlay positioned over the game canvas
+        const gameCanvas = document.getElementById('gameCanvas');
+        const canvasRect = gameCanvas.getBoundingClientRect();
+        
+        const overlay = document.createElement('div');
+        overlay.id = 'gameOverOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: ${canvasRect.top}px;
+            left: ${canvasRect.left}px;
+            width: ${canvasRect.width}px;
+            height: ${canvasRect.height}px;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+        
+        const gameOverText = document.createElement('div');
+        gameOverText.textContent = 'YOU DIE';
+        gameOverText.style.cssText = `
+            color: #FF0000;
+            font-size: 120px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+            animation: pulse 1s infinite;
+        `;
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        overlay.appendChild(gameOverText);
+        document.body.appendChild(overlay);
+    }
+    
     checkCollisions() {
         this.enemies = this.enemies.filter(enemy => {
             if (this.isColliding(this.player, enemy)) {
@@ -357,6 +411,9 @@ class PixelGame {
             }
             return true;
         });
+        
+        // Check for game over
+        this.checkGameOver();
     }
     
     isColliding(rect1, rect2) {
@@ -668,6 +725,8 @@ class PixelGame {
     }
     
     gameLoop() {
+        if (this.gameOver) return;
+        
         this.handleInput();
         this.updateEnemies();
         this.updateBullets();
