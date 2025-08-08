@@ -889,7 +889,7 @@ class PixelGame {
         this.enemies.forEach(enemy => {
             const enemyX = enemy.x * this.minimapScaleX;
             const enemyY = enemy.y * this.minimapScaleY;
-            this.minimapCtx.fillRect(enemyX - 1, enemyY - 1, 2, 2);
+            this.minimapCtx.fillRect(enemyX - 2, enemyY - 2, 4, 4);
         });
         
         // Draw player (yellow dot)
