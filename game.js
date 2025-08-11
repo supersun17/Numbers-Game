@@ -472,7 +472,7 @@ class PixelGame {
         `;
         
         const gameOverText = document.createElement('div');
-        gameOverText.textContent = 'YOU DIE';
+        gameOverText.textContent = 'YOU DIED';
         gameOverText.style.cssText = `
             color: #FF0000;
             font-size: 120px;
