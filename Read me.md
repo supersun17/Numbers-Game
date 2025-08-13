@@ -1,0 +1,12 @@
+Road map:
+- Crit Change caped at 100%
+- Stats Sheet:
+  - Display average damage output per second
+- Minimap
+  - Minimap showing only vicinity instead of the entire map
+  - Minimap camera indicator has the same ratio as the camera
+- Shop:
+  - Kill enemies rewords gold
+  - Shop and be generated at random location
+  - Weapon mutation: forking, bouncing, piercing
+  - Weapon amplification: Addiiontal projectile
