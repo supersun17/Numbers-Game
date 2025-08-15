@@ -670,9 +670,19 @@ class PixelGame {
         document.getElementById('critChanceGained').textContent = `+${stats.gainedCriticalChance}%`;
         document.getElementById('critDamageGained').textContent = `+${stats.gainedCriticalHitDamage}`;
         
-        // Show/hide skill buttons based on available skill points
+        // Show/hide skill buttons based on available skill points and critical chance cap
         const skillButtons = document.querySelectorAll('.skill-button');
         skillButtons.forEach(button => {
+            // Get the stat type from the button ID
+            const statType = button.id.replace('skill-', '');
+            
+            // Disable critical chance button if it's at 100%
+            if (statType === 'crit-chance') {
+                const currentCritChance = stats.criticalHitChance + stats.gainedCriticalChance;
+                button.disabled = currentCritChance >= 100;
+            }
+            
+            // Show the button if we have skill points, otherwise hide
             button.style.display = this.skillPoints > 0 ? 'inline-block' : 'none';
         });
         
@@ -697,8 +707,33 @@ class PixelGame {
         
         const statKey = statMap[statType];
         if (statKey) {
-            // Double the current gained value
-            this.player.stats[statKey] *= 2;
+            // Special handling for critical hit chance to cap at 100%
+            if (statType === 'criticalHitChance') {
+                const currentCritChance = this.player.stats.criticalHitChance + this.player.stats.gainedCriticalChance;
+                if (currentCritChance >= 100) {
+                    return; // Don't allow upgrading beyond 100%
+                }
+            }
+            
+            // Increase the value (instead of doubling it)
+            switch(statType) {
+                case 'attackPower':
+                    this.player.stats.gainedAttackPower += 5;
+                    break;
+                case 'attackSpeed':
+                    this.player.stats.gainedAttackSpeed += 0.1;
+                    break;
+                case 'attackRange':
+                    this.player.stats.gainedAttackRange += 5;
+                    break;
+                case 'criticalHitChance':
+                    this.player.stats.gainedCriticalChance += 5;
+                    break;
+                case 'criticalHitDamage':
+                    this.player.stats.gainedCriticalHitDamage += 50;
+                    break;
+            }
+            
             this.skillPoints -= 1;
             this.updateLevelAndExperience();
             this.showStats(); // Refresh the stats display

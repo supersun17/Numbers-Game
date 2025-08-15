@@ -1,5 +1,5 @@
 Road map:
-- Crit Change caped at 100%
+- ~~Crit Change caped at 100%~~
 - Stats Sheet:
   - Display average damage output per second
 - Minimap

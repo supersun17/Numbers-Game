@@ -182,11 +182,31 @@ h1 {
     gap: 10px;
 }
 
+.stat-label {
+    width: 200px;
+    text-align: left;
+    flex-shrink: 0;
+}
+
 .stat-separator {
     width: 1px;
     height: 20px;
     background-color: rgba(255, 255, 255, 0.3);
     margin: 0 10px;
+    flex-shrink: 0;
+}
+
+.stat-value {
+    color: #00ff88;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.gained-stat {
+    color: #93DA97;
+    margin-left: 8px;
+    font-size: 0.9em;
+    flex-shrink: 0;
 }
 
 .skill-button {
@@ -197,7 +217,8 @@ h1 {
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
-    margin-left: 10px;
+    margin-left: auto;
+    width: 45px;
 }
 
 .skill-button:hover {
@@ -207,46 +228,6 @@ h1 {
 .skill-button:disabled {
     background-color: #666;
     cursor: not-allowed;
-}
-
-.stat-label {
-    font-weight: bold;
-    width: 180px;
-    text-align: left;
-    flex-shrink: 0;
-}
-
-.stat-value {
-    font-weight: bold;
-}
-
-.basic-stat {
-    color: #3E5F44;
-}
-
-.gained-stat {
-    color: #93DA97;
-    font-size: 0.9em;
-    margin-left: 5px;
-}
-
-.stat-label {
-    font-weight: bold;
-}
-
-.basic-stat {
-    color: #3E5F44;
-}
-
-.gained-stat {
-    color: #93DA97;
-    margin-left: 8px;
-    font-size: 0.9em;
-}
-
-.stat-value {
-    color: #00ff88;
-    font-weight: bold;
 }
 
 @media (max-width: 850px) {
