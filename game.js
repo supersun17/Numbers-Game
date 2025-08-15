@@ -670,6 +670,9 @@ class PixelGame {
         document.getElementById('critChanceGained').textContent = `+${stats.gainedCriticalChance}%`;
         document.getElementById('critDamageGained').textContent = `+${stats.gainedCriticalHitDamage}`;
         
+        // Calculate and display effective average DPS
+        this.calculateAndDisplayDPS();
+        
         // Show/hide skill buttons based on available skill points and critical chance cap
         const skillButtons = document.querySelectorAll('.skill-button');
         skillButtons.forEach(button => {
@@ -688,6 +691,25 @@ class PixelGame {
         
         this.updateLevelAndExperience();
         this.statsModal.style.display = 'block';
+    }
+    
+    calculateAndDisplayDPS() {
+        const stats = this.player.stats;
+        const totalAttackPower = stats.attackPower + stats.gainedAttackPower;
+        const totalAttackSpeed = stats.attackSpeed + stats.gainedAttackSpeed;
+        const totalCritChance = stats.criticalHitChance + stats.gainedCriticalChance;
+        const totalCritDamage = stats.criticalHitDamage + stats.gainedCriticalHitDamage;
+        
+        // Calculate average damage per shot
+        const baseDamage = totalAttackPower;
+        const critMultiplier = totalCritDamage / 100;
+        const avgDamage = baseDamage + (baseDamage * (totalCritChance / 100) * (critMultiplier - 1));
+        
+        // Calculate effective DPS
+        const dps = avgDamage * totalAttackSpeed;
+        
+        // Display the calculated DPS
+        document.getElementById('dpsStat').textContent = Math.round(dps);
     }
     
     hideStats() {
