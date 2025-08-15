@@ -121,17 +121,30 @@ class PixelGame {
     init() {
         this.setupEventListeners();
         this.spawnEnemies();
-        // Wait for sprite to load before starting game loop
+        // Load enemy sprites
+        this.loadEnemyASprite();
+        this.loadEnemyBSprite();
+        // Wait for sprites to load before starting game loop
         this.checkSpriteLoaded();
     }
     
     checkSpriteLoaded() {
-        if (this.player.spriteLoaded) {
-            this.gameLoop();
-            this.updateLevelAndExperience();
-        } else {
+        // Check if player sprite is loaded
+        if (!this.player.spriteLoaded) {
             setTimeout(() => this.checkSpriteLoaded(), 100);
+            return;
         }
+        
+        // Check if all enemy sprites are loaded
+        const allEnemiesLoaded = this.enemies.every(enemy => enemy.spriteLoaded);
+        if (!allEnemiesLoaded) {
+            setTimeout(() => this.checkSpriteLoaded(), 100);
+            return;
+        }
+        
+        // If we've made it here, all sprites are loaded, start the game
+        this.gameLoop();
+        this.updateLevelAndExperience();
     }
     
     setupEventListeners() {
@@ -187,6 +200,32 @@ class PixelGame {
         };
     }
     
+    loadEnemyASprite() {
+        // Load villain A sprite for any unloaded A-type enemies
+        this.enemies.forEach(enemy => {
+            if (enemy.type === 'A' && !enemy.spriteLoaded) {
+                enemy.sprite = new Image();
+                enemy.sprite.src = 'Assets/villainA.png';
+                enemy.sprite.onload = () => {
+                    enemy.spriteLoaded = true;
+                };
+            }
+        });
+    }
+    
+    loadEnemyBSprite() {
+        // Load villain B sprite for any unloaded B-type enemies
+        this.enemies.forEach(enemy => {
+            if (enemy.type === 'B' && !enemy.spriteLoaded) {
+                enemy.sprite = new Image();
+                enemy.sprite.src = 'Assets/villainB.png';
+                enemy.sprite.onload = () => {
+                    enemy.spriteLoaded = true;
+                };
+            }
+        });
+    }
+    
     
     generateRoads() {
         const roads = [];
@@ -236,32 +275,34 @@ class PixelGame {
         // Spawn 10 enemy A (regular enemies)
         for (let i = 0; i < 10; i++) {
             this.enemies.push({
-                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 20),
-                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 20),
-                width: 20,
-                height: 20,
+                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 30),
+                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 30),
+                width: 30,
+                height: 30,
                 speedX: 0,
                 speedY: 0,
-                color: '#B9375D',
                 type: 'A',
                 maxHP: enemyHP,
-                currentHP: enemyHP
+                currentHP: enemyHP,
+                sprite: null,
+                spriteLoaded: false
             });
         }
         
         // Spawn 5 enemy B (deflector enemies)
         for (let i = 0; i < 5; i++) {
             this.enemies.push({
-                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 20),
-                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 20),
-                width: 20,
-                height: 20,
+                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 45),
+                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 45),
+                width: 45,
+                height: 45,
                 speedX: 0,
                 speedY: 0,
-                color: '#D25D5D',
                 type: 'B',
                 maxHP: enemyHP,
-                currentHP: enemyHP
+                currentHP: enemyHP,
+                sprite: null,
+                spriteLoaded: false
             });
         }
     }
@@ -271,6 +312,9 @@ class PixelGame {
         this.skillPoints += 1;
         this.updateLevelAndExperience();
         this.spawnEnemies();
+        // Load enemy sprites for new enemies
+        this.loadEnemyASprite();
+        this.loadEnemyBSprite();
     }
     
     handleInput() {
@@ -1100,7 +1144,20 @@ class PixelGame {
         }
         
         this.enemies.forEach(enemy => {
-            this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
+            // Draw enemy sprite if loaded, otherwise fall back to rectangle
+            if (enemy.spriteLoaded) {
+                const screenPos = this.worldToScreen(enemy.x, enemy.y);
+                this.ctx.drawImage(
+                    enemy.sprite, 
+                    screenPos.x, 
+                    screenPos.y, 
+                    enemy.width, 
+                    enemy.height
+                );
+            } else {
+                // Fallback to rectangle if sprite not loaded
+                this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.type === 'A' ? '#B9375D' : '#D25D5D');
+            }
         });
         
         this.bullets.forEach(bullet => {
