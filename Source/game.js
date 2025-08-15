@@ -151,7 +151,7 @@ class PixelGame {
     
     loadPlayerSprite() {
         this.player.sprite = new Image();
-        this.player.sprite.src = 'cowboy-avatar.png';
+        this.player.sprite.src = 'Assets/cowboy-avatar.png';
         this.player.sprite.onload = () => {
             this.player.spriteLoaded = true;
         };
