@@ -1,7 +1,10 @@
-Road map:
+**Road map**
 - ~~Crit Change caped at 100%~~
-- Stats Sheet:
+- Stats Sheet
   - ~~Display average damage output per second~~
+- Battle ground
+  - ~~2000 x 1500~~
+  - Outer world area, player can't walk on it.2200 x 1650, that way we minimap won't block enemies in the world
 - Minimap
   - Minimap showing only vicinity instead of the entire map
   - Minimap camera indicator has the same ratio as the camera

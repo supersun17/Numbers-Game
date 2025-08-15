@@ -16,16 +16,16 @@ class PixelGame {
         this.cameraWidth = 800;
         this.cameraHeight = 600;
         
-        // World size (same width as camera, 3x height)
-        this.worldWidth = this.cameraWidth;
-        this.worldHeight = this.cameraHeight * 3;
+        // World size (2000x1500)
+        this.worldWidth = 2000;
+        this.worldHeight = 1500;
         
         this.canvas.width = this.cameraWidth;
         this.canvas.height = this.cameraHeight;
         
         this.player = {
             x: this.worldWidth / 2,
-            y: this.worldHeight - 100, // Spawn at bottom of map
+            y: this.worldHeight / 2, // Spawn at center of map
             width: 45,
             height: 45,
             speed: 2,
@@ -188,8 +188,8 @@ class PixelGame {
         // Spawn 10 enemy A (regular enemies)
         for (let i = 0; i < 10; i++) {
             this.enemies.push({
-                x: Math.random() * (this.worldWidth - 20),
-                y: Math.random() * (this.worldHeight - 20),
+                x: 50 + Math.random() * (this.worldWidth - 100),
+                y: 50 + Math.random() * (this.worldHeight - 100),
                 width: 20,
                 height: 20,
                 speedX: 0,
@@ -204,8 +204,8 @@ class PixelGame {
         // Spawn 5 enemy B (deflector enemies)
         for (let i = 0; i < 5; i++) {
             this.enemies.push({
-                x: Math.random() * (this.worldWidth - 20),
-                y: Math.random() * (this.worldHeight - 20),
+                x: 50 + Math.random() * (this.worldWidth - 100),
+                y: 50 + Math.random() * (this.worldHeight - 100),
                 width: 20,
                 height: 20,
                 speedX: 0,
