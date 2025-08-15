@@ -15,7 +15,7 @@ class PixelGame {
         // Inventory stash
         this.inventoryStash = {
             isOpen: false,
-            slots: Array(6).fill().map(() => Array(6).fill(null)),
+            slots: Array(3).fill().map(() => Array(3).fill(null)),
             selectedSlot: null,
             gold: 0
         };
@@ -863,13 +863,34 @@ class PixelGame {
         this.inventoryStash.gold -= 10;
         this.updateGoldDisplay();
         
-        // Apply item effect
-        switch(itemType) {
-            case 'piercing':
-                // Enable piercing bullets (modify bullet behavior)
-                this.enablePiercingBullets();
-                alert("Piercing bullets activated! Bullets now pierce through enemies.");
-                break;
+        // Add item to inventory (first available slot)
+        let added = false;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                if (!this.inventoryStash.slots[row][col]) {
+                    // Add the item to the first empty slot
+                    this.inventoryStash.slots[row][col] = itemType;
+                    added = true;
+                    break;
+                }
+            }
+            if (added) break;
+        }
+        
+        if (added) {
+            // Update UI to show the item in inventory
+            this.updateInventoryUI();
+            
+            // Apply item effect
+            switch(itemType) {
+                case 'piercing':
+                    // Enable piercing bullets (modify bullet behavior)
+                    this.enablePiercingBullets();
+                    alert("Piercing bullets activated! Bullets now pierce through enemies.");
+                    break;
+            }
+        } else {
+            alert("Inventory is full!");
         }
         
         // Close shop
@@ -877,6 +898,44 @@ class PixelGame {
         if (overlay) {
             document.body.removeChild(overlay);
         }
+    }
+    
+    updateInventoryUI() {
+        // This function updates the inventory display
+        // Find the inventory overlay
+        const overlay = document.getElementById('inventoryOverlay');
+        if (!overlay) return;
+        
+        // Get the inventory grid
+        const gridContainer = document.getElementById('inventoryGrid');
+        if (!gridContainer) return;
+        
+        // Update the grid display based on inventory slots
+        const slots = gridContainer.querySelectorAll('.inventory-slot');
+        slots.forEach((slot, index) => {
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const item = this.inventoryStash.slots[row][col];
+            
+            // Clear previous content
+            slot.innerHTML = '';
+            
+            // Add item icon if there's an item in this slot
+            if (item) {
+                const itemIcon = document.createElement('div');
+                itemIcon.textContent = item === 'piercing' ? '⚡' : '❓';
+                itemIcon.style.cssText = `
+                    font-size: 30px;
+                    text-align: center;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                `;
+                slot.appendChild(itemIcon);
+            }
+        });
     }
     
     enablePiercingBullets() {
@@ -1127,7 +1186,7 @@ class PixelGame {
         
         // Create title
         const title = document.createElement('h2');
-        title.textContent = 'Inventory Stash';
+        title.textContent = 'Inventory';
         title.style.cssText = `
             text-align: center;
             color: #fff;
@@ -1140,9 +1199,9 @@ class PixelGame {
         gridContainer.id = 'inventoryGrid';
         gridContainer.style.cssText = `
             display: grid;
-            grid-template-columns: repeat(6, 40px);
-            grid-template-rows: repeat(6, 40px);
-            gap: 2px;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 5px;
             background-color: #333;
             padding: 5px;
             border: 1px solid #666;
@@ -1150,15 +1209,15 @@ class PixelGame {
         `;
         
         // Create slots
-        for (let row = 0; row < 6; row++) {
-            for (let col = 0; col < 6; col++) {
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
                 const slot = document.createElement('div');
                 slot.className = 'inventory-slot';
                 slot.dataset.row = row;
                 slot.dataset.col = col;
                 slot.style.cssText = `
-                    width: 40px;
-                    height: 40px;
+                    width: 60px;
+                    height: 60px;
                     background-color: #222;
                     border: 1px solid #444;
                     display: flex;
@@ -1228,8 +1287,9 @@ class PixelGame {
         overlay.appendChild(inventoryContainer);
         document.body.appendChild(overlay);
         
-        // Update gold display when inventory is shown
+        // Update gold display and inventory when inventory is shown
         this.updateGoldDisplay();
+        this.updateInventoryUI();
     }
     
     hideInventoryStash() {
