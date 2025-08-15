@@ -10,8 +10,8 @@
   - ~~2000 x 1500~~
   - ~~Outer world area, player can't walk on it (150px border)~~
 - Minimap
-  - Minimap showing only vicinity instead of the entire map
-  - Minimap camera indicator has the same ratio as the camera
+  - ~~Minimap showing only vicinity instead of the entire map~~
+  - ~~Minimap camera indicator has the same ratio as the camera~~
 - Shop:
   - ~~Kill enemies rewords 1 gold~~
   - Shop and be generated at the center of the World
