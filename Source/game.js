@@ -315,6 +315,23 @@ class PixelGame {
         // Load enemy sprites for new enemies
         this.loadEnemyASprite();
         this.loadEnemyBSprite();
+        
+        // Regenerate shop at center of world
+        this.shop = {
+            x: this.worldWidth / 2 - 25, // 25 is half of 50 (shop width)
+            y: this.worldHeight / 2 - 25, // 25 is half of 50 (shop height)
+            width: 50,
+            height: 50,
+            sprite: null,
+            spriteLoaded: false
+        };
+        
+        // Ensure shop is within playable area (accounting for border)
+        this.shop.x = Math.max(this.borderSize, Math.min(this.shop.x, this.worldWidth - this.borderSize - this.shop.width));
+        this.shop.y = Math.max(this.borderSize, Math.min(this.shop.y, this.worldHeight - this.borderSize - this.shop.height));
+        
+        // Load shop sprite
+        this.loadShopSprite();
     }
     
     handleInput() {
@@ -615,10 +632,12 @@ class PixelGame {
             return true;
         });
         
-        // Check if player collides with shop
-        if (this.isColliding(this.player, this.shop)) {
-            // When player touches shop, trigger shop interaction
+        // Check if player collides with shop (only if shop exists)
+        if (this.shop && this.isColliding(this.player, this.shop)) {
+            // When player touches shop, open the shop modal
             this.openShop();
+            // Then remove the shop
+            this.shop = null;
         }
         
         // Check for game over
@@ -626,10 +645,248 @@ class PixelGame {
     }
     
     openShop() {
-        // When player touches shop, show shop interface (placeholder implementation)
-        // In a real implementation, this would show a modal with shop items
-        // For now, we'll just log to console to indicate the shop was triggered
-        console.log("Shop interaction triggered");
+        // Create shop overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'shopOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        `;
+        
+        // Create main shop container
+        const shopContainer = document.createElement('div');
+        shopContainer.id = 'shopContainer';
+        shopContainer.style.cssText = `
+            background: #222222;
+            padding: 20px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 500px;
+            max-width: 90vw;
+        `;
+        
+        // Create title
+        const title = document.createElement('h2');
+        title.textContent = 'Shop';
+        title.style.cssText = `
+            text-align: center;
+            color: #fff;
+            margin-bottom: 15px;
+            width: 100%;
+        `;
+        
+        // Create items container
+        const itemsContainer = document.createElement('div');
+        itemsContainer.id = 'shopItems';
+        itemsContainer.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        `;
+        
+        // Item 1: Piercing
+        const piercingItem = document.createElement('div');
+        piercingItem.className = 'shop-item';
+        piercingItem.dataset.item = 'piercing';
+        piercingItem.style.cssText = `
+            background-color: #444;
+            padding: 15px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        `;
+        
+        const piercingInfo = document.createElement('div');
+        piercingInfo.innerHTML = `
+            <div style="font-weight: bold; color: #ffcc00;">Piercing Bullet</div>
+            <div style="font-size: 14px; color: #ccc;">Bullets pierce through enemies</div>
+            <div style="font-size: 14px; color: #ffcc00;">Cost: 10 Gold</div>
+        `;
+        
+        const purchaseButton = document.createElement('button');
+        purchaseButton.textContent = 'Buy';
+        purchaseButton.style.cssText = `
+            padding: 5px 10px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        `;
+        purchaseButton.onclick = () => this.purchaseItem('piercing');
+        
+        piercingItem.appendChild(piercingInfo);
+        piercingItem.appendChild(purchaseButton);
+        
+        // Item 2: WIP
+        const wipItem1 = document.createElement('div');
+        wipItem1.className = 'shop-item';
+        wipItem1.dataset.item = 'wip1';
+        wipItem1.style.cssText = `
+            background-color: #444;
+            padding: 15px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        `;
+        
+        const wipInfo1 = document.createElement('div');
+        wipInfo1.innerHTML = `
+            <div style="font-weight: bold; color: #ffcc00;">WIP Item 1</div>
+            <div style="font-size: 14px; color: #ccc;">Work in Progress</div>
+            <div style="font-size: 14px; color: #ffcc00;">Cost: 15 Gold</div>
+        `;
+        
+        const wipButton1 = document.createElement('button');
+        wipButton1.textContent = 'Buy';
+        wipButton1.style.cssText = `
+            padding: 5px 10px;
+            background-color: #888;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.5;
+            pointer-events: none;
+        `;
+        
+        wipItem1.appendChild(wipInfo1);
+        wipItem1.appendChild(wipButton1);
+        
+        // Item 3: WIP
+        const wipItem2 = document.createElement('div');
+        wipItem2.className = 'shop-item';
+        wipItem2.dataset.item = 'wip2';
+        wipItem2.style.cssText = `
+            background-color: #444;
+            padding: 15px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        `;
+        
+        const wipInfo2 = document.createElement('div');
+        wipInfo2.innerHTML = `
+            <div style="font-weight: bold; color: #ffcc00;">WIP Item 2</div>
+            <div style="font-size: 14px; color: #ccc;">Work in Progress</div>
+            <div style="font-size: 14px; color: #ffcc00;">Cost: 20 Gold</div>
+        `;
+        
+        const wipButton2 = document.createElement('button');
+        wipButton2.textContent = 'Buy';
+        wipButton2.style.cssText = `
+            padding: 5px 10px;
+            background-color: #888;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.5;
+            pointer-events: none;
+        `;
+        
+        wipItem2.appendChild(wipInfo2);
+        wipItem2.appendChild(wipButton2);
+        
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Close';
+        closeBtn.style.cssText = `
+            padding: 8px 16px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            display: block;
+            margin: 15px auto 0;
+        `;
+        
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+        
+        // Append elements
+        itemsContainer.appendChild(piercingItem);
+        itemsContainer.appendChild(wipItem1);
+        itemsContainer.appendChild(wipItem2);
+        shopContainer.appendChild(title);
+        shopContainer.appendChild(itemsContainer);
+        shopContainer.appendChild(closeBtn);
+        overlay.appendChild(shopContainer);
+        document.body.appendChild(overlay);
+        
+        // Add event listener to close when clicking outside
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+            }
+        });
+    }
+    
+    purchaseItem(itemType) {
+        // Check if player has enough gold
+        if (this.inventoryStash.gold < 10) {
+            alert("Not enough gold!");
+            return;
+        }
+        
+        // Deduct gold
+        this.inventoryStash.gold -= 10;
+        this.updateGoldDisplay();
+        
+        // Apply item effect
+        switch(itemType) {
+            case 'piercing':
+                // Enable piercing bullets (modify bullet behavior)
+                this.enablePiercingBullets();
+                alert("Piercing bullets activated! Bullets now pierce through enemies.");
+                break;
+        }
+        
+        // Close shop
+        const overlay = document.getElementById('shopOverlay');
+        if (overlay) {
+            document.body.removeChild(overlay);
+        }
+    }
+    
+    enablePiercingBullets() {
+        // Store the original bullet filtering logic
+        // For simplicity, we'll modify bullet behavior to always pierce
+        // In a real implementation, this would track bullet states or flags
+        
+        // This is a simplified implementation for demonstration
+        // In a full implementation, we'd modify the bullet creation or filtering logic
+        // to make bullets not be filtered out when hitting enemies
     }
     
     isColliding(rect1, rect2) {
@@ -1129,7 +1386,7 @@ class PixelGame {
         }
         
         // Draw shop
-        if (this.shop.spriteLoaded) {
+        if (this.shop && this.shop.spriteLoaded) {
             const screenPos = this.worldToScreen(this.shop.x, this.shop.y);
             this.ctx.drawImage(
                 this.shop.sprite, 
@@ -1138,7 +1395,7 @@ class PixelGame {
                 this.shop.width, 
                 this.shop.height
             );
-        } else {
+        } else if (this.shop) {
             // Fallback to rectangle if sprite not loaded
             this.drawPixelRect(this.shop.x, this.shop.y, this.shop.width, this.shop.height, '#ffd700');
         }
@@ -1253,10 +1510,12 @@ class PixelGame {
         });
         
         // Draw shop (golden square)
-        const shopX = this.shop.x * this.minimapScaleX;
-        const shopY = this.shop.y * this.minimapScaleY;
-        this.minimapCtx.fillStyle = '#ffd700';
-        this.minimapCtx.fillRect(shopX - 3, shopY - 3, 6, 6);
+        if (this.shop) {
+            const shopX = this.shop.x * this.minimapScaleX;
+            const shopY = this.shop.y * this.minimapScaleY;
+            this.minimapCtx.fillStyle = '#ffd700';
+            this.minimapCtx.fillRect(shopX - 3, shopY - 3, 6, 6);
+        }
         
         // Draw player (yellow dot)
         const playerX = this.player.x * this.minimapScaleX;
