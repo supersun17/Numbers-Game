@@ -20,6 +20,9 @@ class PixelGame {
         this.worldWidth = 2000;
         this.worldHeight = 1500;
         
+        // Border size (150px all around)
+        this.borderSize = 150;
+        
         this.canvas.width = this.cameraWidth;
         this.canvas.height = this.cameraHeight;
         
@@ -188,8 +191,8 @@ class PixelGame {
         // Spawn 10 enemy A (regular enemies)
         for (let i = 0; i < 10; i++) {
             this.enemies.push({
-                x: 50 + Math.random() * (this.worldWidth - 100),
-                y: 50 + Math.random() * (this.worldHeight - 100),
+                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 20),
+                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 20),
                 width: 20,
                 height: 20,
                 speedX: 0,
@@ -204,8 +207,8 @@ class PixelGame {
         // Spawn 5 enemy B (deflector enemies)
         for (let i = 0; i < 5; i++) {
             this.enemies.push({
-                x: 50 + Math.random() * (this.worldWidth - 100),
-                y: 50 + Math.random() * (this.worldHeight - 100),
+                x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 20),
+                y: this.borderSize + Math.random() * (this.worldHeight - 2 * this.borderSize - 20),
                 width: 20,
                 height: 20,
                 speedX: 0,
@@ -227,16 +230,16 @@ class PixelGame {
     
     handleInput() {
         if (this.keys['a'] || this.keys['ArrowLeft']) {
-            this.player.x = Math.max(0, this.player.x - this.player.speed);
+            this.player.x = Math.max(this.borderSize, this.player.x - this.player.speed);
         }
         if (this.keys['d'] || this.keys['ArrowRight']) {
-            this.player.x = Math.min(this.worldWidth - this.player.width, this.player.x + this.player.speed);
+            this.player.x = Math.min(this.worldWidth - this.borderSize - this.player.width, this.player.x + this.player.speed);
         }
         if (this.keys['w'] || this.keys['ArrowUp']) {
-            this.player.y = Math.max(0, this.player.y - this.player.speed);
+            this.player.y = Math.max(this.borderSize, this.player.y - this.player.speed);
         }
         if (this.keys['s'] || this.keys['ArrowDown']) {
-            this.player.y = Math.min(this.worldHeight - this.player.height, this.player.y + this.player.speed);
+            this.player.y = Math.min(this.worldHeight - this.borderSize - this.player.height, this.player.y + this.player.speed);
         }
         
         // Update camera to follow player
@@ -774,7 +777,7 @@ class PixelGame {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(Math.floor(screenPos.x), Math.floor(screenPos.y), width, height);
     }
-    
+
     drawCircle(x, y, radius, color) {
         const screenPos = this.worldToScreen(x, y);
         this.ctx.fillStyle = color;
@@ -907,10 +910,10 @@ class PixelGame {
         this.minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
         this.minimapCtx.fillRect(0, 0, this.minimapWidth, this.minimapHeight);
         
-        // Draw world border
-        this.minimapCtx.strokeStyle = '#ffffff';
-        this.minimapCtx.lineWidth = 1;
-        this.minimapCtx.strokeRect(0, 0, this.minimapWidth, this.minimapHeight);
+        // Draw the world area in minimap (without showing border)
+        // The entire minimap represents the world area
+        this.minimapCtx.fillStyle = '#000000';
+        this.minimapCtx.fillRect(0, 0, this.minimapWidth, this.minimapHeight);
         
         // Draw roads on minimap (thin sandy lines)
         this.minimapCtx.strokeStyle = '#F4A460';
