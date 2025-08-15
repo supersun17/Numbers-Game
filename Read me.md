@@ -2,6 +2,8 @@
 - ~~Crit Change caped at 100%~~
 - Stats Sheet
   - ~~Display average damage output per second~~
+- Inventory
+  - ~~Press B to toggle inventory~~
 - Battle ground
   - ~~2000 x 1500~~
   - ~~Outer world area, player can't walk on it (150px border)~~

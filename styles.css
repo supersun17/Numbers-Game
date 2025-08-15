@@ -252,24 +252,62 @@ h1 {
     z-index: 100;
 }
 
-@media (max-width: 600px) {
-    #gameCanvas {
-        max-width: 400px;
-        height: 300px;
-    }
-    
-    .minimap {
-        width: 100px;
-        height: 75px;
-        top: 5px;
-        right: 5px;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    .controls {
-        font-size: 0.9rem;
-    }
+.inventory-slot {
+    transition: background-color 0.2s;
+}
+
+.inventory-slot:hover {
+    background-color: #333;
+}
+
+#inventoryOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+#inventoryContainer {
+    background: #000000;
+    padding: 20px;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+#inventoryGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 40px);
+    grid-template-rows: repeat(6, 40px);
+    gap: 2px;
+    background-color: #333;
+    padding: 5px;
+    border: 1px solid #666;
+}
+
+.inventory-slot {
+    width: 40px;
+    height: 40px;
+    background-color: #222;
+    border: 1px solid #444;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.inventory-slot:hover {
+    background-color: #333;
+}
+
+.inventory-slot.selected {
+    outline: 2px solid #ffff00;
 }

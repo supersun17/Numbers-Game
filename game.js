@@ -12,6 +12,13 @@ class PixelGame {
         this.statsModal = document.getElementById('statsModal');
         this.closeStatsBtn = document.querySelector('.close-stats');
         
+        // Inventory stash
+        this.inventoryStash = {
+            isOpen: false,
+            slots: Array(6).fill().map(() => Array(6).fill(null)),
+            selectedSlot: null
+        };
+        
         // Camera view size (what's visible on screen)
         this.cameraWidth = 800;
         this.cameraHeight = 600;
@@ -108,6 +115,10 @@ class PixelGame {
             
             if (e.key.toLowerCase() === 'c') {
                 this.toggleStats();
+            }
+            // Toggle inventory stash with 'b' key
+            if (e.key.toLowerCase() === 'b') {
+                this.toggleInventoryStash();
             }
         });
         
@@ -229,6 +240,9 @@ class PixelGame {
     }
     
     handleInput() {
+        // Don't process input if inventory is open
+        if (this.inventoryStash.isOpen) return;
+        
         if (this.keys['a'] || this.keys['ArrowLeft']) {
             this.player.x = Math.max(this.borderSize, this.player.x - this.player.speed);
         }
@@ -659,6 +673,11 @@ class PixelGame {
     }
     
     showStats() {
+        // Hide inventory if it's open
+        if (this.inventoryStash.isOpen) {
+            this.hideInventoryStash();
+        }
+        
         const stats = this.player.stats;
         document.getElementById('healthStat').textContent = `${stats.currentHealth}/${stats.totalHealth}`;
         document.getElementById('attackPowerStat').textContent = stats.attackPower;
@@ -717,6 +736,142 @@ class PixelGame {
     
     hideStats() {
         this.statsModal.style.display = 'none';
+    }
+    
+    toggleInventoryStash() {
+        this.inventoryStash.isOpen = !this.inventoryStash.isOpen;
+        if (this.inventoryStash.isOpen) {
+            this.showInventoryStash();
+        } else {
+            this.hideInventoryStash();
+        }
+    }
+    
+    showInventoryStash() {
+        // Create inventory stash overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'inventoryOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        `;
+        
+        // Create main inventory container
+        const inventoryContainer = document.createElement('div');
+        inventoryContainer.id = 'inventoryContainer';
+        inventoryContainer.style.cssText = `
+            background: #000000;
+            padding: 20px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        `;
+        
+        // Create title
+        const title = document.createElement('h2');
+        title.textContent = 'Inventory Stash';
+        title.style.cssText = `
+            text-align: center;
+            color: #fff;
+            margin-bottom: 15px;
+        `;
+        
+        // Create grid container
+        const gridContainer = document.createElement('div');
+        gridContainer.id = 'inventoryGrid';
+        gridContainer.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(6, 40px);
+            grid-template-rows: repeat(6, 40px);
+            gap: 2px;
+            background-color: #333;
+            padding: 5px;
+            border: 1px solid #666;
+        `;
+        
+        // Create slots
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 6; col++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.dataset.row = row;
+                slot.dataset.col = col;
+                slot.style.cssText = `
+                    width: 40px;
+                    height: 40px;
+                    background-color: #222;
+                    border: 1px solid #444;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    position: relative;
+                `;
+                
+                // Add click handler to select slot
+                slot.addEventListener('click', (e) => {
+                    // Remove highlight from previously selected slot
+                    if (this.inventoryStash.selectedSlot) {
+                        const prevSlot = document.querySelector(`.inventory-slot[data-row="${this.inventoryStash.selectedSlot.row}"][data-col="${this.inventoryStash.selectedSlot.col}"]`);
+                        if (prevSlot) {
+                            prevSlot.style.outline = 'none';
+                        }
+                    }
+                    
+                    // Highlight current slot
+                    slot.style.outline = '2px solid #ffff00';
+                    this.inventoryStash.selectedSlot = { row, col };
+                });
+                
+                gridContainer.appendChild(slot);
+            }
+        }
+        
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Close';
+        closeBtn.style.cssText = `
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            display: block;
+            margin: 15px auto 0;
+        `;
+        
+        closeBtn.addEventListener('click', () => {
+            this.inventoryStash.isOpen = false;
+            document.body.removeChild(overlay);
+        });
+        
+        // Append elements
+        inventoryContainer.appendChild(title);
+        inventoryContainer.appendChild(gridContainer);
+        inventoryContainer.appendChild(closeBtn);
+        overlay.appendChild(inventoryContainer);
+        document.body.appendChild(overlay);
+    }
+    
+    hideInventoryStash() {
+        const overlay = document.getElementById('inventoryOverlay');
+        if (overlay) {
+            document.body.removeChild(overlay);
+        }
+        this.inventoryStash.isOpen = false;
+        this.inventoryStash.selectedSlot = null;
     }
     
     useSkillPoint(statType) {
