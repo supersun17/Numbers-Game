@@ -14,6 +14,6 @@
   - Minimap camera indicator has the same ratio as the camera
 - Shop:
   - ~~Kill enemies rewords 1 gold~~
-  - Shop and be generated at random location
+  - Shop and be generated at the center of the World
   - Weapon mutation: forking, bouncing, piercing
   - Weapon amplification: Addiiontal projectile

@@ -20,6 +20,16 @@ class PixelGame {
             gold: 0
         };
         
+        // Shop
+        this.shop = {
+            x: 0,
+            y: 0,
+            width: 50,
+            height: 50,
+            sprite: null,
+            spriteLoaded: false
+        };
+        
         // Camera view size (what's visible on screen)
         this.cameraWidth = 800;
         this.cameraHeight = 600;
@@ -35,8 +45,8 @@ class PixelGame {
         this.canvas.height = this.cameraHeight;
         
         this.player = {
-            x: this.worldWidth / 2,
-            y: this.worldHeight / 2, // Spawn at center of map
+            x: this.worldWidth - 45 - this.borderSize, // Spawn at top right corner
+            y: this.borderSize, // Spawn at top right corner
             width: 45,
             height: 45,
             speed: 2,
@@ -60,8 +70,15 @@ class PixelGame {
             spriteLoaded: false
         };
         
+        // Ensure player spawn position is within valid bounds
+        this.player.x = Math.max(this.borderSize, Math.min(this.player.x, this.worldWidth - this.borderSize - this.player.width));
+        this.player.y = Math.max(this.borderSize, Math.min(this.player.y, this.worldHeight - this.borderSize - this.player.height));
+        
         // Load player sprite
         this.loadPlayerSprite();
+        
+        // Load shop sprite
+        this.loadShopSprite();
         
         // Camera position (follows the player)
         this.camera = {
@@ -90,8 +107,13 @@ class PixelGame {
         this.explosions = [];
         this.gameOver = false;
         
-        // Start with 0 gold
-        this.inventoryStash.gold = 0;
+        // Position shop at center of world, but within playable area
+        this.shop.x = this.worldWidth / 2 - this.shop.width / 2;
+        this.shop.y = this.worldHeight / 2 - this.shop.height / 2;
+        
+        // Ensure shop is within playable area (accounting for border)
+        this.shop.x = Math.max(this.borderSize, Math.min(this.shop.x, this.worldWidth - this.borderSize - this.shop.width));
+        this.shop.y = Math.max(this.borderSize, Math.min(this.shop.y, this.worldHeight - this.borderSize - this.shop.height));
         
         this.init();
     }
@@ -154,6 +176,14 @@ class PixelGame {
         this.player.sprite.src = 'Assets/cowboy-avatar.png';
         this.player.sprite.onload = () => {
             this.player.spriteLoaded = true;
+        };
+    }
+    
+    loadShopSprite() {
+        this.shop.sprite = new Image();
+        this.shop.sprite.src = 'Assets/weapon-shop.png';
+        this.shop.sprite.onload = () => {
+            this.shop.spriteLoaded = true;
         };
     }
     
@@ -541,13 +571,21 @@ class PixelGame {
             return true;
         });
         
-        // Check if all enemies are defeated via collision
-        if (this.enemies.length === 0 && originalEnemyCount > 0) {
-            this.advanceWorldLevel();
+        // Check if player collides with shop
+        if (this.isColliding(this.player, this.shop)) {
+            // When player touches shop, trigger shop interaction
+            this.openShop();
         }
         
         // Check for game over
         this.checkGameOver();
+    }
+    
+    openShop() {
+        // When player touches shop, show shop interface (placeholder implementation)
+        // In a real implementation, this would show a modal with shop items
+        // For now, we'll just log to console to indicate the shop was triggered
+        console.log("Shop interaction triggered");
     }
     
     isColliding(rect1, rect2) {
@@ -1046,6 +1084,21 @@ class PixelGame {
             );
         }
         
+        // Draw shop
+        if (this.shop.spriteLoaded) {
+            const screenPos = this.worldToScreen(this.shop.x, this.shop.y);
+            this.ctx.drawImage(
+                this.shop.sprite, 
+                screenPos.x, 
+                screenPos.y, 
+                this.shop.width, 
+                this.shop.height
+            );
+        } else {
+            // Fallback to rectangle if sprite not loaded
+            this.drawPixelRect(this.shop.x, this.shop.y, this.shop.width, this.shop.height, '#ffd700');
+        }
+        
         this.enemies.forEach(enemy => {
             this.drawPixelRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
         });
@@ -1141,6 +1194,12 @@ class PixelGame {
             const enemyY = enemy.y * this.minimapScaleY;
             this.minimapCtx.fillRect(enemyX - 2, enemyY - 2, 4, 4);
         });
+        
+        // Draw shop (golden square)
+        const shopX = this.shop.x * this.minimapScaleX;
+        const shopY = this.shop.y * this.minimapScaleY;
+        this.minimapCtx.fillStyle = '#ffd700';
+        this.minimapCtx.fillRect(shopX - 3, shopY - 3, 6, 6);
         
         // Draw player (yellow dot)
         const playerX = this.player.x * this.minimapScaleX;
