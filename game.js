@@ -16,7 +16,8 @@ class PixelGame {
         this.inventoryStash = {
             isOpen: false,
             slots: Array(6).fill().map(() => Array(6).fill(null)),
-            selectedSlot: null
+            selectedSlot: null,
+            gold: 0
         };
         
         // Camera view size (what's visible on screen)
@@ -88,6 +89,9 @@ class PixelGame {
         this.damagePopups = [];
         this.explosions = [];
         this.gameOver = false;
+        
+        // Start with 0 gold
+        this.inventoryStash.gold = 0;
         
         this.init();
     }
@@ -382,6 +386,9 @@ class PixelGame {
                     // Check if enemy is defeated
                     if (enemy.currentHP <= 0) {
                         this.experience += 1;
+                        
+                        // Add gold reward for defeating enemy
+                        this.addGold(1);
                         
                         // Level up every 2 experience
                         if (this.experience >= 2) {
@@ -774,6 +781,9 @@ class PixelGame {
             border-radius: 10px;
             position: relative;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         `;
         
         // Create title
@@ -783,6 +793,7 @@ class PixelGame {
             text-align: center;
             color: #fff;
             margin-bottom: 15px;
+            width: 100%;
         `;
         
         // Create grid container
@@ -796,6 +807,7 @@ class PixelGame {
             background-color: #333;
             padding: 5px;
             border: 1px solid #666;
+            margin-bottom: 15px;
         `;
         
         // Create slots
@@ -836,11 +848,23 @@ class PixelGame {
             }
         }
         
+        // Create gold display
+        const goldDisplay = document.createElement('div');
+        goldDisplay.id = 'goldDisplay';
+        goldDisplay.textContent = `Gold: ${this.inventoryStash.gold}`;
+        goldDisplay.style.cssText = `
+            text-align: left;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 18px;
+            width: 100%;
+            padding-left: 10px;
+        `;
+        
         // Close button
         const closeBtn = document.createElement('button');
         closeBtn.textContent = 'Close';
         closeBtn.style.cssText = `
-            margin-top: 15px;
             padding: 8px 16px;
             background-color: #00aaff;
             color: white;
@@ -849,7 +873,7 @@ class PixelGame {
             cursor: pointer;
             font-size: 14px;
             display: block;
-            margin: 15px auto 0;
+            margin: 10px auto 0;
         `;
         
         closeBtn.addEventListener('click', () => {
@@ -860,9 +884,13 @@ class PixelGame {
         // Append elements
         inventoryContainer.appendChild(title);
         inventoryContainer.appendChild(gridContainer);
+        inventoryContainer.appendChild(goldDisplay);
         inventoryContainer.appendChild(closeBtn);
         overlay.appendChild(inventoryContainer);
         document.body.appendChild(overlay);
+        
+        // Update gold display when inventory is shown
+        this.updateGoldDisplay();
     }
     
     hideInventoryStash() {
@@ -872,6 +900,13 @@ class PixelGame {
         }
         this.inventoryStash.isOpen = false;
         this.inventoryStash.selectedSlot = null;
+    }
+    
+    updateGoldDisplay() {
+        const goldDisplay = document.getElementById('goldDisplay');
+        if (goldDisplay) {
+            goldDisplay.textContent = `Gold: ${this.inventoryStash.gold}`;
+        }
     }
     
     useSkillPoint(statType) {
@@ -1142,6 +1177,11 @@ class PixelGame {
             startTime: Date.now(),
             color: color
         });
+    }
+    
+    addGold(amount) {
+        this.inventoryStash.gold += amount;
+        this.updateGoldDisplay();
     }
 }
 

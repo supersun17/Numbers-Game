@@ -1,9 +1,11 @@
 **Road map**
-- ~~Crit Change caped at 100%~~
+- Player Stats
+  - ~~Crit Change caped at 100%~~
 - Stats Sheet
   - ~~Display average damage output per second~~
 - Inventory
   - ~~Press B to toggle inventory~~
+  - ~~Display current gold~~
 - Battle ground
   - ~~2000 x 1500~~
   - ~~Outer world area, player can't walk on it (150px border)~~
@@ -11,7 +13,7 @@
   - Minimap showing only vicinity instead of the entire map
   - Minimap camera indicator has the same ratio as the camera
 - Shop:
-  - Kill enemies rewords gold
+  - ~~Kill enemies rewords 1 gold~~
   - Shop and be generated at random location
   - Weapon mutation: forking, bouncing, piercing
   - Weapon amplification: Addiiontal projectile
