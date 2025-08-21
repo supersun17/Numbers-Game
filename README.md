@@ -1,3 +1,6 @@
+### This is a web game developed with agentic AI, hosted on GitHub Page.
+
+
 **Road map**
 - Player Stats
   - ~~Crit Change caped at 100%~~
