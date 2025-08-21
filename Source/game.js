@@ -1587,6 +1587,10 @@ class PixelGame {
     gameLoop() {
         if (this.gameOver) return;
         
+        // Calculate target frame time for 60Hz (16.67ms)
+        const frameTime = 1000 / 60;
+        const startTime = performance.now();
+        
         this.handleInput();
         this.updateEnemies();
         this.updateBullets();
@@ -1599,7 +1603,11 @@ class PixelGame {
         this.drawExplosions();
         this.drawMinimap();
         
-        requestAnimationFrame(() => this.gameLoop());
+        // Calculate actual frame time and adjust next frame delay
+        const actualFrameTime = performance.now() - startTime;
+        const nextFrameDelay = Math.max(0, frameTime - actualFrameTime);
+        
+        setTimeout(() => this.gameLoop(), nextFrameDelay);
     }
     
     showDamagePopup(damage, x, y, color = '#FFFFFF', isCritical = false) {
