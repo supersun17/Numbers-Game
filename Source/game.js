@@ -49,7 +49,7 @@ class PixelGame {
             y: this.borderSize, // Spawn at top right corner
             width: 45,
             height: 45,
-            speed: 2,
+            speed: 4,
             color: '#FEA405',
             stats: {
                 totalHealth: 100,
@@ -390,7 +390,7 @@ class PixelGame {
                         y: this.player.y + this.player.height / 2,
                         width: 4,
                         height: 4,
-                        speed: 4,
+                        speed: 8,
                         directionX: directionX,
                         directionY: directionY,
                         damage: finalDamage,
@@ -510,7 +510,7 @@ class PixelGame {
         
         for (let i = 0; i < numParticles; i++) {
             const angle = (Math.PI * 2 * i) / numParticles;
-            const speed = 2 + Math.random() * 3;
+            const speed = 4 + Math.random() * 6;
             particles.push({
                 x: x,
                 y: y,
@@ -1332,16 +1332,16 @@ class PixelGame {
             // Increase the value (instead of doubling it)
             switch(statType) {
                 case 'attackPower':
-                    this.player.stats.gainedAttackPower += 5;
+                    this.player.stats.gainedAttackPower += 10;
                     break;
                 case 'attackSpeed':
-                    this.player.stats.gainedAttackSpeed += 0.1;
+                    this.player.stats.gainedAttackSpeed += 0.2;
                     break;
                 case 'attackRange':
-                    this.player.stats.gainedAttackRange += 5;
+                    this.player.stats.gainedAttackRange += 10;
                     break;
                 case 'criticalHitChance':
-                    this.player.stats.gainedCriticalChance += 5;
+                    this.player.stats.gainedCriticalChance += 10;
                     break;
                 case 'criticalHitDamage':
                     this.player.stats.gainedCriticalHitDamage += 50;
