@@ -467,10 +467,9 @@ class PixelGame {
                     
                     // Handle enemy B deflection
                     if (enemy.type === 'B') {
-                        // Deflect bullet to random direction
-                        const randomAngle = Math.random() * Math.PI * 2;
-                        bullet.directionX = Math.cos(randomAngle);
-                        bullet.directionY = Math.sin(randomAngle);
+                        // Deflect bullet in the opposite direction of its incoming trajectory
+                        bullet.directionX = -bullet.directionX;
+                        bullet.directionY = -bullet.directionY;
                         
                         // Change bullet color to indicate deflection
                         bullet.color = '#D25D5D';
@@ -479,6 +478,16 @@ class PixelGame {
                         enemy.currentHP -= damage;
                         const isCritical = bullet.isCritical;
                         this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
+                        
+                        // Check if the deflected bullet hits the player immediately
+                        // This ensures that deflected bullets can actually damage the player
+                        if (this.isColliding(bullet, this.player)) {
+                            this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - 10);
+                            this.showDamagePopup(10, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
+                            this.createExplosion(bullet.x, bullet.y);
+                            // Return false to remove the bullet from the game
+                            return false;
+                        }
                     } else {
                         bulletHit = true;
                         // Regular enemy A behavior
