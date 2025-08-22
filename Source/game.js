@@ -20,6 +20,11 @@ class PixelGame {
             gold: 0
         };
         
+        // Player inventory for items
+        this.inventory = {
+            piercingBullets: false
+        };
+        
         // Shop
         this.shop = {
             x: 0,
@@ -28,6 +33,11 @@ class PixelGame {
             height: 50,
             sprite: null,
             spriteLoaded: false
+        };
+        
+        // Player inventory for items
+        this.inventory = {
+            piercingBullets: false
         };
         
         // Camera view size (what's visible on screen)
@@ -395,7 +405,8 @@ class PixelGame {
                         directionY: directionY,
                         damage: finalDamage,
                         isCritical: isCritical,
-                        color: isCritical ? '#ffff00' : '#ffffff'
+                        color: isCritical ? '#ffff00' : '#ffffff',
+                        pierce: this.inventory.piercingBullets
                     });
                     this.player.lastShotTime = currentTime;
                 }
@@ -500,7 +511,9 @@ class PixelGame {
                 this.advanceWorldLevel();
             }
             
-            return !bulletHit;
+            // For piercing bullets, don't remove them when hitting enemies
+            // Only remove non-piercing bullets
+            return bullet.pierce || !bulletHit;
         });
     }
     
@@ -884,8 +897,8 @@ class PixelGame {
             // Apply item effect
             switch(itemType) {
                 case 'piercing':
-                    // Enable piercing bullets (modify bullet behavior)
-                    this.enablePiercingBullets();
+                    // Enable piercing bullets
+                    this.inventory.piercingBullets = true;
                     alert("Piercing bullets activated! Bullets now pierce through enemies.");
                     break;
             }
@@ -938,15 +951,8 @@ class PixelGame {
         });
     }
     
-    enablePiercingBullets() {
-        // Store the original bullet filtering logic
-        // For simplicity, we'll modify bullet behavior to always pierce
-        // In a real implementation, this would track bullet states or flags
-        
-        // This is a simplified implementation for demonstration
-        // In a full implementation, we'd modify the bullet creation or filtering logic
-        // to make bullets not be filtered out when hitting enemies
-    }
+    // This method is no longer needed as we're using the inventory.piercingBullets flag
+    // to determine bullet behavior
     
     isColliding(rect1, rect2) {
         return rect1.x < rect2.x + rect2.width &&
