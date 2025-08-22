@@ -35,11 +35,6 @@ class PixelGame {
             spriteLoaded: false
         };
         
-        // Player inventory for items
-        this.inventory = {
-            piercingBullets: false
-        };
-        
         // Camera view size (what's visible on screen)
         this.cameraWidth = 800;
         this.cameraHeight = 600;
@@ -457,6 +452,7 @@ class PixelGame {
     }
     
     checkBulletCollisions() {
+        // First, process all bullet-enemy collisions
         this.bullets = this.bullets.filter(bullet => {
             let bulletHit = false;
             
@@ -473,28 +469,14 @@ class PixelGame {
                         
                         // Change bullet color to indicate deflection
                         bullet.color = '#D25D5D';
-
-                        // Still apply damage
-                        enemy.currentHP -= damage;
-                        const isCritical = bullet.isCritical;
-                        this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
-                        
-                        // Check if the deflected bullet hits the player immediately
-                        // This ensures that deflected bullets can actually damage the player
-                        if (this.isColliding(bullet, this.player)) {
-                            this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - 10);
-                            this.showDamagePopup(10, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
-                            this.createExplosion(bullet.x, bullet.y);
-                            // Return false to remove the bullet from the game
-                            return false;
-                        }
                     } else {
                         bulletHit = true;
-                        // Regular enemy A behavior
-                        enemy.currentHP -= damage;
-                        const isCritical = bullet.isCritical;
-                        this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
                     }
+
+                    // Always apply damage to enemy regardless of type
+                    enemy.currentHP -= damage;
+                    const isCritical = bullet.isCritical;
+                    this.showDamagePopup(damage, enemy.x + enemy.width/2, enemy.y + enemy.height/2, isCritical ? '#ffff00' : '#FFFFFF', isCritical);
 
                     // Check if enemy is defeated
                     if (enemy.currentHP <= 0) {
@@ -525,6 +507,19 @@ class PixelGame {
             // For piercing bullets, don't remove them when hitting enemies
             // Only remove non-piercing bullets
             return bullet.pierce || !bulletHit;
+        });
+        
+        // Then, check if any bullets hit the player (after all enemy collisions are processed)
+        this.bullets = this.bullets.filter(bullet => {
+            // Only apply damage to player if bullet was deflected (has red color)
+            if (this.isColliding(bullet, this.player) && bullet.color === '#D25D5D') {
+                this.player.stats.currentHealth = Math.max(0, this.player.stats.currentHealth - 10);
+                this.showDamagePopup(10, this.player.x + this.player.width/2, this.player.y - 10, '#FF0000');
+                this.createExplosion(bullet.x, bullet.y);
+                // Return false to remove bullet
+                return false;
+            }
+            return true;
         });
     }
     
