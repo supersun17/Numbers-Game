@@ -277,11 +277,13 @@ class PixelGame {
     }
     
     spawnEnemies() {
-        const baseHP = 25; // Base HP for World Level 1
+        const enemyABaseHP = 25; // Base HP for World Level 1
+        const enemyBBaseHP = 55; // Base HP for World Level 1
         const worldLevelMultiplier = this.worldLevel;
-        const additionalHP = (this.worldLevel - 1) * (this.worldLevel * 0.5);
-        const enemyHP = Math.floor((baseHP * worldLevelMultiplier) + additionalHP);
-        
+        const additionalHP = (this.worldLevel - 1) * (this.worldLevel * 10);
+        const enemyAHP = Math.floor((enemyABaseHP * worldLevelMultiplier) + additionalHP);
+        const enemyBHP = Math.floor((enemyBBaseHP * worldLevelMultiplier) + additionalHP);
+
         // Spawn 10 enemy A (regular enemies)
         for (let i = 0; i < 10; i++) {
             this.enemies.push({
@@ -292,14 +294,14 @@ class PixelGame {
                 speedX: 0,
                 speedY: 0,
                 type: 'A',
-                maxHP: enemyHP,
-                currentHP: enemyHP,
+                maxHP: enemyAHP,
+                currentHP: enemyAHP,
                 sprite: null,
                 spriteLoaded: false
             });
         }
         
-        // Spawn 5 enemy B (deflector enemies)
+        // Spawn 5 enemy B (deflector enemies) with doubled HP
         for (let i = 0; i < 5; i++) {
             this.enemies.push({
                 x: this.borderSize + Math.random() * (this.worldWidth - 2 * this.borderSize - 45),
@@ -309,8 +311,8 @@ class PixelGame {
                 speedX: 0,
                 speedY: 0,
                 type: 'B',
-                maxHP: enemyHP,
-                currentHP: enemyHP,
+                maxHP: enemyBHP,
+                currentHP: enemyBHP,
                 sprite: null,
                 spriteLoaded: false
             });
