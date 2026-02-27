@@ -1,22 +1,24 @@
-### This is a web game developed with agentic AI, hosted on GitHub Page.
+# Numbers Game
 
+A pixel-art survival game where you destroy red boxes, level up, and upgrade your stats.
 
-**Road map**
-- Player Stats
-  - ~~Crit Change caped at 100%~~
-- Stats Sheet
-  - ~~Display average damage output per second~~
-- Inventory
-  - ~~Press B to toggle inventory~~
-  - ~~Display current gold~~
-- Battle ground
-  - ~~2000 x 1500~~
-  - ~~Outer world area, player can't walk on it (150px border)~~
-- Minimap
-  - ~~Minimap showing only vicinity instead of the entire map~~
-  - ~~Minimap camera indicator has the same ratio as the camera~~
-- Shop:
-  - ~~Kill enemies rewords 1 gold~~
-  - Shop and be generated at the center of the World
-  - Weapon mutation: forking, bouncing, piercing
-  - Weapon amplification: Addiiontal projectile
+## How to Run
+
+You can run this game by simply opening `index.html` in your web browser (double-click the file).
+
+### Optional: Using a Local Server
+While not required, you can also serve the game via a local web server:
+
+#### Option 1: Using NPM
+If you have Node.js installed, run:
+```bash
+npm start
+```
+Then open `http://localhost:8080` in Chrome.
+
+#### Option 2: Using Python
+If you have Python installed, run:
+```bash
+python3 -m http.server
+```
+Then open `http://localhost:8000` in Chrome.
