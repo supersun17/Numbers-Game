@@ -1,0 +1,12 @@
+{
+  "name": "numbers-game",
+  "version": "1.0.0",
+  "description": "A simple survival numbers game",
+  "main": "Source/main.js",
+  "scripts": {
+    "start": "npx -y http-server ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
